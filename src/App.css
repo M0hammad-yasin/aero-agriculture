@@ -1,0 +1,58 @@
+.app-container {
+  padding: 20px;
+  background-color: #f0f4f8;
+}
+
+.heading {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  color: #2d3748;
+}
+
+.text {
+  font-size: 1.125rem;
+  margin-bottom: 24px;
+  color: #4a5568;
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 28rem;
+}
+
+.button-stack {
+  display: flex;
+  gap: 16px;
+}
+
+.button-primary {
+  background-color: #3182ce;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-secondary {
+  background-color: #e2e8f0;
+  color: #2d3748;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.info-box {
+  padding: 16px;
+  background-color: #f0fff4;
+  border-radius: 8px;
+  border-left: 4px solid #38a169;
+}
+
+.info-text {
+  font-weight: 500;
+  color: #2f855a;
+}
