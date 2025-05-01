@@ -12,6 +12,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const bgColor = useColorModeValue('gray.50', 'gray.800');
   const sidebarWidth = collapsed ? '60px' : '200px';
+  
+  // Mock user data - replace with actual user data from authentication system
+  const mockUser = {
+    name: 'Demo User',
+    image: ''
+  };
 
   const onToggle = () => setCollapsed(!collapsed);
 
@@ -40,7 +46,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         position="relative"
         zIndex={1}
       >
-        <Header collapsed={collapsed} onToggle={onToggle}  />
+        <Header collapsed={collapsed} onToggle={onToggle} user={mockUser} />
         <Box as="main" p={4} minH="calc(100vh - 64px)">
           {children}
         </Box>

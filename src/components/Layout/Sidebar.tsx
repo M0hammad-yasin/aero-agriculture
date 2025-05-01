@@ -42,6 +42,8 @@ const NavItem = ({ icon, children, isActive = false }: NavItemProps) => {
 const Sidebar = ({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle: () => void }) => {
   const bgColor = useColorModeValue('white', 'gray.900');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const collapsibleButtonBg = useColorModeValue('white', 'gray.900'); // Added for button
+  const collapsibleButtonHoverBg = useColorModeValue('gray.100', 'gray.800'); // Added for button
   const sidebarWidth = collapsed ? '60px' : '200px';
   const logoFontSize = collapsed ? 'lg' : '2xl';
   const logoText = collapsed ? 'AA' : 'AeroAgriculture';
@@ -70,6 +72,8 @@ const Sidebar = ({ collapsed = false, onToggle }: { collapsed?: boolean; onToggl
         <CollapsibleButton 
           collapsed={collapsed}
           onToggle={onToggle}
+          buttonBg={collapsibleButtonBg} // Pass prop
+          buttonHoverBg={collapsibleButtonHoverBg} // Pass prop
         />
       </Flex>:
       <Flex px="4" py="5" align="center" justify={collapsed ? 'center' : 'flex-start'}>
