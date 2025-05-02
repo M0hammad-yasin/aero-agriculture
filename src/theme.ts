@@ -1,6 +1,7 @@
 import { extendTheme } from '@chakra-ui/react';
 
 const colors = {
+
   brand: {
     50: '#f0f9eb',
     100: '#d7efc4',
@@ -28,6 +29,7 @@ const colors = {
 };
 
 const theme = extendTheme({
+  initialColorMode: 'dark',
   colors,
   fonts: {
     heading: '"Inter", sans-serif',

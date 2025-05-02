@@ -6,7 +6,6 @@ import {
   useColorMode,
   Box,
   Text,
-  HStack,
   Container,
   Menu,
   MenuButton,
@@ -33,15 +32,16 @@ import { FiBell, FiSun, FiMoon, FiUser, FiEdit, FiLogOut } from 'react-icons/fi'
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import CollapsibleButton from './CollapsibleButton';
+import { useLayoutStore } from '../../store/useLayoutStore'; // Import the Zustand store
 
 interface HeaderProps {
-  collapsed: boolean;
-  onToggle: () => void;
   onMenuToggle?: () => void;
-  user?: { name: string; image?: string };
+  user?: { name: string; image?: string } | null; // User can be null initially
 }
 
-const Header = ({ collapsed, onToggle, onMenuToggle, user }: HeaderProps) => {
+const Header = ({  user }: HeaderProps) => {
+  const collapsed = useLayoutStore((state) => state.collapsed); // Get state from store
+  // const toggleSidebar = useLayoutStore((state) => state.toggleSidebar); // Get action from store
   const bgColor = useColorModeValue('white', 'gray.900');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const { colorMode, toggleColorMode } = useColorMode();
@@ -65,11 +65,12 @@ const Header = ({ collapsed, onToggle, onMenuToggle, user }: HeaderProps) => {
   const notificationMenuListBg = useColorModeValue('white', 'gray.900');
   const modalContentBg = useColorModeValue('white', 'gray.800');
   const drawerContentBg = useColorModeValue('white', 'gray.800');
-  const collapsibleButtonBg = useColorModeValue('white', 'gray.900');
-  const collapsibleButtonHoverBg = useColorModeValue('gray.100', 'gray.800');
-
-  // Update time every second
   useEffect(() => {
+    setNotifications((prevNotifications) => {
+      // Simulate new notifications
+      const newNotifications = [...prevNotifications, 'New notification!'];
+      return newNotifications;
+    });
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
@@ -94,7 +95,7 @@ const Header = ({ collapsed, onToggle, onMenuToggle, user }: HeaderProps) => {
 
   // Placeholder for LED toggle component
   const LEDToggle = ({ className }: { className?: string }) => (
-    <Button size="sm" colorScheme="blue" className={className}>
+    <Button size="sm" backgroundColor={'green.700'}  className={className}>
       LED Toggle
     </Button>
   );
@@ -118,11 +119,8 @@ const Header = ({ collapsed, onToggle, onMenuToggle, user }: HeaderProps) => {
         >
           {!collapsed && (
             <Flex justify="center" align="center" mt="4" order={0}>
+              {/* CollapsibleButton now gets state and toggle from store directly */}
               <CollapsibleButton 
-                collapsed={collapsed} 
-                onToggle={onToggle} 
-                buttonBg={collapsibleButtonBg} 
-                buttonHoverBg={collapsibleButtonHoverBg} 
               />
             </Flex>
           )}
@@ -139,32 +137,6 @@ const Header = ({ collapsed, onToggle, onMenuToggle, user }: HeaderProps) => {
               <LEDToggle />
             </Box>
             
-            {user && <Text mr={3}>{user.name}</Text>}
-
-            {user && (
-              <Menu>
-                <MenuButton>
-                  <Avatar
-                    size="sm"
-                    name={user.name}
-                    src={user.image || "https://mdbcdn.b-cdn.net/img/new/avatars/1.webp"}
-                    cursor="pointer"
-                  />
-                </MenuButton>
-                <MenuList bg={menuListBg}>
-                  <MenuItem icon={<FiUser />} onClick={onProfileOpen}>
-                    My profile
-                  </MenuItem>
-                  <MenuItem icon={<FiEdit />} onClick={onUpdateOpen}>
-                    Update Profile
-                  </MenuItem>
-                  <MenuItem icon={<FiLogOut />} onClick={onLogoutOpen}>
-                    Logout
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            )}
-
             <Box ml={2}>
               <Menu>
                 <MenuButton
@@ -197,6 +169,34 @@ const Header = ({ collapsed, onToggle, onMenuToggle, user }: HeaderProps) => {
                 </MenuList>
               </Menu>
             </Box>
+
+            {user && <Text mr={3}>{user.name}</Text>}
+
+            {user && (
+              <Menu>
+                <MenuButton>
+                  <Avatar
+                    size="sm"
+                    name={user.name}
+                    src={user.image || "https://mdbcdn.b-cdn.net/img/new/avatars/1.webp"}
+                    cursor="pointer"
+                  />
+                </MenuButton>
+                <MenuList bg={menuListBg}>
+                  <MenuItem icon={<FiUser />} onClick={onProfileOpen}>
+                    My profile
+                  </MenuItem>
+                  <MenuItem icon={<FiEdit />} onClick={onUpdateOpen}>
+                    Update Profile
+                  </MenuItem>
+                  <MenuItem icon={<FiLogOut />} onClick={onLogoutOpen}>
+                    Logout
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            )}
+
+            
 
             <IconButton
               aria-label="Toggle color mode"
