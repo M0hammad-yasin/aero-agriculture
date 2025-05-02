@@ -28,8 +28,13 @@ const colors = {
   },
 };
 
-const theme = extendTheme({
+const config = {
   initialColorMode: 'dark',
+  useSystemColorMode: false,
+};
+
+const theme = extendTheme({
+  config,
   colors,
   fonts: {
     heading: '"Inter", sans-serif',

@@ -27,12 +27,14 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
+  Tooltip,
 } from '@chakra-ui/react';
-import { FiBell, FiSun, FiMoon, FiUser, FiEdit, FiLogOut } from 'react-icons/fi';
+import { FiBell, FiSun, FiMoon, FiUser, FiEdit, FiLogOut, FiPower } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import CollapsibleButton from './CollapsibleButton';
-import { useLayoutStore } from '../../store/useLayoutStore'; // Import the Zustand store
+import { useLayoutStore } from '../../store/useLayoutStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -87,17 +89,28 @@ const Header = ({  user }: HeaderProps) => {
     return date.toLocaleTimeString('en-GB');
   };
 
-  // Placeholder for logout function
+  // Use the logout function from auth store
+  const logout = useAuthStore((state) => state.logout);
+  
   const logoutUser = () => {
-    console.log('User logged out');
+    logout();
     onLogoutClose();
   };
 
-  // Placeholder for LED toggle component
+  // LED toggle component with tooltip for better UX
   const LEDToggle = ({ className }: { className?: string }) => (
-    <Button size="sm" backgroundColor={'green.700'}  className={className}>
-      LED Toggle
-    </Button>
+    <Tooltip label="Toggle LED Status" placement="bottom">
+      <Button 
+        size="sm" 
+        backgroundColor={'green.700'} 
+        color="white"
+        _hover={{ backgroundColor: 'green.600' }}
+        className={className}
+        aria-label="Toggle LED Status"
+      >
+        LED Toggle
+      </Button>
+    </Tooltip>
   );
 
   return (
@@ -221,7 +234,7 @@ const Header = ({  user }: HeaderProps) => {
             <Button variant="ghost" mr={3} onClick={onLogoutClose}>
               Cancel
             </Button>
-            <Button as={Link} to="/" colorScheme="blue" onClick={logoutUser}>
+            <Button as={Link} to="/login" colorScheme="blue" onClick={logoutUser} leftIcon={<FiPower />}>
               Logout
             </Button>
           </ModalFooter>

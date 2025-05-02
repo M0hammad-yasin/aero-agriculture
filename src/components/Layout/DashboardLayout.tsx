@@ -33,7 +33,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </GridItem>
       <GridItem
         area="main"
-        overflow="auto"
         bg={bgColor}
         position="relative"
         zIndex={1}

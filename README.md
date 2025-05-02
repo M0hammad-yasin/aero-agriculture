@@ -1,6 +1,31 @@
-# React + TypeScript + Vite
+# AeroAgriculture
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern web application for agricultural drone management and field analysis built with React, TypeScript, and Vite.
+
+## Project Structure
+
+The project follows a scalable folder structure:
+
+```
+src/
+├── assets/         # Static assets like images and icons
+├── components/     # Reusable UI components
+│   ├── auth/       # Authentication related components
+│   ├── Dashboard/  # Dashboard specific components
+│   └── Layout/     # Layout components (Header, Sidebar, etc.)
+├── pages/          # Page components that represent routes
+│   └── auth/       # Authentication pages (Login, Register)
+├── store/          # State management with Zustand
+└── utils/          # Utility functions and helpers
+```
+
+## Features
+
+- **Authentication System**: Login page with form validation
+- **Protected Routes**: Secure access to dashboard and other features
+- **Responsive Design**: Works on mobile, tablet, and desktop
+- **State Management**: Using Zustand for global state
+- **Theme Support**: Light and dark mode with Chakra UI
 
 Currently, two official plugins are available:
 
