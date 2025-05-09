@@ -52,11 +52,13 @@ const Sidebar = () => { // Remove props
     <Box
       as="nav"
       pos="fixed"
-      top="0"
-      left="0"
-      zIndex="sticky"
+      top={2}
+      left={3}
+      zIndex="relative"
       h="full"
+      borderRadius={"md"}
       pb="10"
+      blur={2}
       overflowX="hidden"
       overflowY="auto"
       bg={bgColor}
@@ -74,8 +76,9 @@ const Sidebar = () => { // Remove props
 
         />
       </Flex>:
-      <Flex px="4" py="5" align="center" justify={collapsed ? 'center' : 'flex-start'}>
+      <Flex px="6" py="6" overflow='hidden' align="center" justify={collapsed ? 'center' : 'flex-start'}>
         <Text
+
           fontSize={logoFontSize}
           fontWeight="semibold"
           color="brand.500"

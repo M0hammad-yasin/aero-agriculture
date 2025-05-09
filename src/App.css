@@ -1,18 +1,15 @@
 .app-container {
   padding: 20px;
-  background-color: #f0f4f8;
 }
 
 .heading {
   font-size: 2rem;
   margin-bottom: 16px;
-  color: #2d3748;
 }
 
 .text {
   font-size: 1.125rem;
   margin-bottom: 24px;
-  color: #4a5568;
 }
 
 .flex-container {
@@ -28,8 +25,6 @@
 }
 
 .button-primary {
-  background-color: #3182ce;
-  color: white;
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -37,8 +32,6 @@
 }
 
 .button-secondary {
-  background-color: #e2e8f0;
-  color: #2d3748;
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -47,12 +40,10 @@
 
 .info-box {
   padding: 16px;
-  background-color: #f0fff4;
   border-radius: 8px;
-  border-left: 4px solid #38a169;
+  border-left: 4px solid;
 }
 
 .info-text {
   font-weight: 500;
-  color: #2f855a;
 }

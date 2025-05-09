@@ -1,4 +1,4 @@
-import { extendTheme } from '@chakra-ui/react';
+import { extendTheme, ThemeConfig, withDefaultColorScheme } from '@chakra-ui/react';
 
 const colors = {
 
@@ -28,38 +28,54 @@ const colors = {
   },
 };
 
-const config = {
+const config :ThemeConfig = {
   initialColorMode: 'dark',
   useSystemColorMode: false,
 };
 
-const theme = extendTheme({
-  config,
-  colors,
-  fonts: {
-    heading: '"Inter", sans-serif',
-    body: '"Inter", sans-serif',
-  },
-  components: {
-    Button: {
-      variants: {
-        solid: {
-          bg: 'brand.500',
-          color: 'white',
-          _hover: {
-            bg: 'brand.600',
+const theme = extendTheme(
+  {
+    config,
+    colors,
+    fonts: {
+      heading: '"Inter", sans-serif',
+      body: '"Inter", sans-serif',
+    },
+    components: {
+      Button: {
+        variants: {
+          solid: {
+            bg: 'brand.500',
+            color: 'white',
+            _hover: {
+              bg: 'brand.600', // Example hover background
+            },
           },
-        },
-        outline: {
-          borderColor: 'brand.500',
-          color: 'brand.500',
-          _hover: {
-            bg: 'brand.50',
+          outline: {
+            borderColor: 'brand.500',
+            color: 'brand.500',
+            _hover: {
+              bg: 'brand.50',
+            },
           },
         },
       },
     },
+    // Override default gray colors with green
+    semanticTokens: {
+      colors: {
+        // Replace default gray tokens with brand (green) colors
+        'chakra-body-bg': { _light: 'green.500', _dark: 'gray.900' },
+        'chakra-body-text': { _light: 'gray.800', _dark: 'whiteAlpha.900' },
+        'chakra-border-color': { _light: 'brand.200', _dark: 'whiteAlpha.300' },
+        'chakra-subtle-bg': { _light: 'brand.50', _dark: 'gray.700' },
+        'chakra-subtle-text': { _light: 'brand.600', _dark: 'brand.200' },
+        'chakra-placeholder-color': { _light: 'brand.500', _dark: 'whiteAlpha.400' },
+      },
+    },
   },
-});
+  // Apply brand (green) color scheme to all components
+  withDefaultColorScheme({ colorScheme: 'brand' })
+);
 
 export default theme;

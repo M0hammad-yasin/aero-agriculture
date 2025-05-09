@@ -3,7 +3,6 @@ import {
   IconButton,
   Avatar,
   useColorModeValue,
-  useColorMode,
   Box,
   Text,
   Container,
@@ -29,12 +28,13 @@ import {
   DrawerCloseButton,
   Tooltip,
 } from '@chakra-ui/react';
-import { FiBell, FiSun, FiMoon, FiUser, FiEdit, FiLogOut, FiPower } from 'react-icons/fi';
+import { FiBell,FiUser, FiEdit, FiLogOut, FiPower } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import CollapsibleButton from './CollapsibleButton';
-import { useLayoutStore } from '../../store/useLayoutStore';
-import { useAuthStore } from '../../store/useAuthStore';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { useLayoutStore } from '../../../store/useLayoutStore';
+import CollapsibleButton from '../CollapsibleButton';
+import ColorModeSwitch from './ColorModeSwitch';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -44,9 +44,7 @@ interface HeaderProps {
 const Header = ({  user }: HeaderProps) => {
   const collapsed = useLayoutStore((state) => state.collapsed); // Get state from store
   // const toggleSidebar = useLayoutStore((state) => state.toggleSidebar); // Get action from store
-  const bgColor = useColorModeValue('white', 'gray.900');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const { colorMode, toggleColorMode } = useColorMode();
   const [time, setTime] = useState(new Date());
   // Mock notifications for demonstration
   const [notifications, setNotifications] = useState<string[]>([
@@ -66,6 +64,7 @@ const Header = ({  user }: HeaderProps) => {
   const menuListBg = useColorModeValue('white', 'gray.900');
   const notificationMenuListBg = useColorModeValue('white', 'gray.900');
   const modalContentBg = useColorModeValue('white', 'gray.800');
+  const bg = useColorModeValue('green.400', 'gray.900');
   const drawerContentBg = useColorModeValue('white', 'gray.800');
   useEffect(() => {
     setNotifications((prevNotifications) => {
@@ -115,10 +114,13 @@ const Header = ({  user }: HeaderProps) => {
 
   return (
     <Box
+    margin={3}
+    marginLeft={5}
+    borderRadius={"md"}
       as="nav"
-      bg={bgColor}
       boxShadow="sm"
       mb={2}
+      bg={bg}
       borderBottomWidth="1px"
       borderBottomColor={borderColor}
     >
@@ -161,7 +163,7 @@ const Header = ({  user }: HeaderProps) => {
                 >
                   {notifications.length > 0 && (
                     <Badge
-                      colorScheme="red"
+                      colorScheme="brand"
                       borderRadius="full"
                       position="absolute"
                       top="0"
@@ -209,16 +211,9 @@ const Header = ({  user }: HeaderProps) => {
               </Menu>
             )}
 
-            
+            <ColorModeSwitch/>
 
-            <IconButton
-              aria-label="Toggle color mode"
-              icon={colorMode === 'light' ? <FiMoon /> : <FiSun />}
-              size="sm"
-              variant="ghost"
-              ml={2}
-              onClick={toggleColorMode}
-            />
+            
           </Flex>
         </Flex>
       </Container>
@@ -234,7 +229,7 @@ const Header = ({  user }: HeaderProps) => {
             <Button variant="ghost" mr={3} onClick={onLogoutClose}>
               Cancel
             </Button>
-            <Button as={Link} to="/login" colorScheme="blue" onClick={logoutUser} leftIcon={<FiPower />}>
+            <Button as={Link} to="/login" colorScheme="brand" onClick={logoutUser} leftIcon={<FiPower />}>
               Logout
             </Button>
           </ModalFooter>
@@ -276,7 +271,7 @@ const Header = ({  user }: HeaderProps) => {
             <Button variant="ghost" mr={3} onClick={onUpdateClose}>
               Cancel
             </Button>
-            <Button colorScheme="blue">
+            <Button colorScheme="brand">
               Save Changes
             </Button>
           </ModalFooter>
