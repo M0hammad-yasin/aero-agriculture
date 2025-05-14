@@ -14,7 +14,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <Grid
-      // background={bgColor}
+      background={"inherit"}
       h="100vh"
       templateAreas={{ base: '"main"', md: '"sidebar main"' }}
       templateColumns={{ base: "1fr", md: `${sidebarWidth} 1fr` }}

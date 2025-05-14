@@ -26,7 +26,6 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
-  Tooltip,
 } from '@chakra-ui/react';
 import { FiBell,FiUser, FiEdit, FiLogOut, FiPower } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
@@ -35,6 +34,8 @@ import { useAuthStore } from '../../../store/useAuthStore';
 import { useLayoutStore } from '../../../store/useLayoutStore';
 import CollapsibleButton from '../CollapsibleButton';
 import ColorModeSwitch from './ColorModeSwitch';
+import LEDToggle from './LEDToggle';
+import TimeDisplay from './TimeDisplay';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -45,7 +46,6 @@ const Header = ({  user }: HeaderProps) => {
   const collapsed = useLayoutStore((state) => state.collapsed); // Get state from store
   // const toggleSidebar = useLayoutStore((state) => state.toggleSidebar); // Get action from store
   const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const [time, setTime] = useState(new Date());
   // Mock notifications for demonstration
   const [notifications, setNotifications] = useState<string[]>([
     'New drone data available',
@@ -72,45 +72,16 @@ const Header = ({  user }: HeaderProps) => {
       const newNotifications = [...prevNotifications, 'New notification!'];
       return newNotifications;
     });
-    const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
+    // Time update logic is now in TimeDisplay.tsx
   }, []);
-
-  // Format date as DD/MM/YYYY
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB');
-  };
-
-  // Format time as HH:MM:SS
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-GB');
-  };
 
   // Use the logout function from auth store
   const logout = useAuthStore((state) => state.logout);
-  
+console.log("header bg : " , bg  );
   const logoutUser = () => {
     logout();
     onLogoutClose();
   };
-
-  // LED toggle component with tooltip for better UX
-  const LEDToggle = ({ className }: { className?: string }) => (
-    <Tooltip label="Toggle LED Status" placement="bottom">
-      <Button 
-        size="sm" 
-        backgroundColor={'green.700'} 
-        color="white"
-        _hover={{ backgroundColor: 'green.600' }}
-        className={className}
-        aria-label="Toggle LED Status"
-      >
-        LED Toggle
-      </Button>
-    </Tooltip>
-  );
 
   return (
     <Box
@@ -145,8 +116,7 @@ const Header = ({  user }: HeaderProps) => {
           </Flex>
 
           <Flex align="center">
-            <Text px={3}>{formatDate(time)}</Text>
-            <Text px={3}>{formatTime(time)}</Text>
+            <TimeDisplay />
             
             <Box mx={3}>
               <LEDToggle />
