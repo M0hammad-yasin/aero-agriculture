@@ -15,10 +15,13 @@ import {
   useColorModeValue,
   Container,
   useToast,
+  Alert,
+  AlertIcon,
+  Link,
 } from '@chakra-ui/react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/useAuthStore';
+import { Link as RouterLink } from 'react-router-dom';
+import { useAuth } from '../../features/authentication/hooks/auth.hook';
 
 interface LoginFormData {
   email: string;
@@ -28,13 +31,11 @@ interface LoginFormData {
 interface LoginFormErrors {
   email?: string;
   password?: string;
-  general?: string;
 }
 
 const LoginPage = () => {
-  const navigate = useNavigate();
   const toast = useToast();
-  const login = useAuthStore((state) => state.login);
+  const { login, isLoading, error: authError } = useAuth();
   
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -42,7 +43,6 @@ const LoginPage = () => {
   });
   
   const [errors, setErrors] = useState<LoginFormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -89,17 +89,10 @@ const LoginPage = () => {
     
     if (!validateForm()) return;
     
-    setIsLoading(true);
-    
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo purposes, accept any well-formed email/password
-      // In a real app, this would validate against a backend
-      login({
-        name: formData.email.split('@')[0], // Use part of email as name for demo
+      await login({
         email: formData.email,
+        password: formData.password,
       });
       
       toast({
@@ -109,14 +102,10 @@ const LoginPage = () => {
         duration: 3000,
         isClosable: true,
       });
-      
-      navigate('/dashboard');
     } catch (error) {
-      setErrors({
-        general: error? `${error}`:'Failed to login. Please check your credentials.',
-      });
-    } finally {
-      setIsLoading(false);
+      console.log(error);
+      // Error is already handled in the useAuth hook
+      // and displayed in the UI below
     }
   };
   
@@ -148,16 +137,11 @@ const LoginPage = () => {
               </Text>
             </Flex>
             
-            {errors.general && (
-              <Box
-                p={3}
-                bg="red.100"
-                color="red.700"
-                borderRadius="md"
-                fontSize="sm"
-              >
-                {errors.general}
-              </Box>
+            {authError && (
+              <Alert status="error" borderRadius="md">
+                <AlertIcon />
+                {authError}
+              </Alert>
             )}
             
             <form onSubmit={handleSubmit}>
@@ -219,14 +203,9 @@ const LoginPage = () => {
             <Flex justify="center" mt={4}>
               <Text fontSize="sm">
                 Don't have an account?{' '}
-                <Button
-                  variant="link"
-                  colorScheme="brand"
-                  size="sm"
-                  onClick={() => navigate('/register')}
-                >
+                <Link as={RouterLink} to="/register" color="brand.500" fontWeight="semibold">
                   Sign Up
-                </Button>
+                </Link>
               </Text>
             </Flex>
           </VStack>

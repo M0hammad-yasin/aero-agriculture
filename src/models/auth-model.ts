@@ -47,3 +47,28 @@ export interface User {
     currentPassword?: string;
     newPassword?: string;
   }
+  export interface ApiResponse<T> {
+    data: T | null;
+    error: string | null;
+    status: number | null;
+    isSuccess: boolean;
+  }
+
+  export interface PaginationParams {
+    page?: number;
+    size?: number;
+    sort?: string;
+    order?: 'asc' | 'desc';
+  }
+  export interface PaginatedResponse<T> {
+    items: T[];
+    total: number;
+    page: number;
+    size: number;
+    totalPages: number;
+  }
+  export interface UserResponse{
+    user: User;
+    token: string;
+    expiresAt: string;
+  }

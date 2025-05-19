@@ -40,4 +40,5 @@ class ApiClient {
 
 // Export a singleton instance
 const apiClient = ApiClient.getInstance();
-export default apiClient.getAxiosInstance();
+const axiosInstance = apiClient.getAxiosInstance();
+export default axiosInstance;

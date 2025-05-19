@@ -1,12 +1,12 @@
 import { AxiosInstance } from 'axios';
-import BaseApiService, { ApiResponse } from './baseApiService';
+import BaseApiService, { ApiResponse } from './api/baseApiServices';
 import { 
   User, 
   LoginRequest, 
   RegisterRequest, 
   AuthResponse, 
   ProfileUpdateRequest 
-} from '../models/auth.model';
+} from '../models/auth-model';
 
 /**
  * Authentication Service
@@ -49,7 +49,7 @@ class AuthService extends BaseApiService<User> {
    * @returns Promise with API response
    */
   async getCurrentProfile(): Promise<ApiResponse<User>> {
-    return this.customGet<User>('../users/profile');
+    return this.customGet<User>('users/profile');
   }
 
   /**
@@ -58,8 +58,9 @@ class AuthService extends BaseApiService<User> {
    * @returns Promise with API response
    */
   async updateProfile(profileData: ProfileUpdateRequest): Promise<ApiResponse<User>> {
-    return this.customPut<ProfileUpdateRequest, User>('../users/profile', profileData);
+    return this.customPut<ProfileUpdateRequest, User>('users/profile', profileData);
   }
+  
 }
 
 export default AuthService;

@@ -247,6 +247,7 @@ abstract class BaseApiService<T, ID = string> {
     try {
       const response = await this.axios.post<R>(`${this.resourceUrl}/${url}`, data, config);
       return this.formatResponse(response);
+      
     } catch (error) {
       return this.handleError<R>(error);
     }
