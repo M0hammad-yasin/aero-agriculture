@@ -1,4 +1,9 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from "axios";
 
 /**
  * Response wrapper for API responses
@@ -6,7 +11,7 @@ import { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'ax
 export interface ApiResponse<T> {
   data: T | null;
   error: string | null;
-  status: number | null;
+  status: number;
   isSuccess: boolean;
 }
 
@@ -17,7 +22,7 @@ export interface PaginationParams {
   page?: number;
   size?: number;
   sort?: string;
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
 }
 
 /**
@@ -57,11 +62,14 @@ abstract class BaseApiService<T, ID = string> {
    */
   protected handleError<R>(error: unknown): ApiResponse<R> {
     if (error instanceof AxiosError) {
-      const status = error.response?.status || null;
-      const message = error.response?.data?.message || error.message || 'Unknown error occurred';
-      
+      const status = error.response?.status || (error.request ? 503 : 500);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error occurred";
+
       console.error(`API Error (${status}):`, message);
-      
+
       return {
         data: null,
         error: message,
@@ -69,15 +77,16 @@ abstract class BaseApiService<T, ID = string> {
         isSuccess: false,
       };
     }
-    
+
     // Handle non-axios errors
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    console.error('Non-Axios Error:', errorMessage);
-    
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Non-Axios Error:", errorMessage);
+
     return {
       data: null,
       error: errorMessage,
-      status: null,
+      status: 500,
       isSuccess: false,
     };
   }
@@ -122,18 +131,21 @@ abstract class BaseApiService<T, ID = string> {
   ): Promise<ApiResponse<PaginatedResponse<T>>> {
     try {
       const { page = 0, size = 10, sort, order } = params;
-      
-      const response = await this.axios.get<PaginatedResponse<T>>(this.resourceUrl, {
-        ...config,
-        params: {
-          ...config?.params,
-          page,
-          size,
-          ...(sort && { sort }),
-          ...(order && { order }),
-        },
-      });
-      
+
+      const response = await this.axios.get<PaginatedResponse<T>>(
+        this.resourceUrl,
+        {
+          ...config,
+          params: {
+            ...config?.params,
+            page,
+            size,
+            ...(sort && { sort }),
+            ...(order && { order }),
+          },
+        }
+      );
+
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<PaginatedResponse<T>>(error);
@@ -148,7 +160,10 @@ abstract class BaseApiService<T, ID = string> {
    */
   async getById(id: ID, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
-      const response = await this.axios.get<T>(`${this.resourceUrl}/${id}`, config);
+      const response = await this.axios.get<T>(
+        `${this.resourceUrl}/${id}`,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<T>(error);
@@ -161,9 +176,16 @@ abstract class BaseApiService<T, ID = string> {
    * @param config - Optional axios request configuration
    * @returns Promise with API response containing the created entity
    */
-  async create(entity: Partial<T>, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async create(
+    entity: Partial<T>,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     try {
-      const response = await this.axios.post<T>(this.resourceUrl, entity, config);
+      const response = await this.axios.post<T>(
+        this.resourceUrl,
+        entity,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<T>(error);
@@ -177,9 +199,17 @@ abstract class BaseApiService<T, ID = string> {
    * @param config - Optional axios request configuration
    * @returns Promise with API response containing the updated entity
    */
-  async update(id: ID, entity: Partial<T>, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async update(
+    id: ID,
+    entity: Partial<T>,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     try {
-      const response = await this.axios.put<T>(`${this.resourceUrl}/${id}`, entity, config);
+      const response = await this.axios.put<T>(
+        `${this.resourceUrl}/${id}`,
+        entity,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<T>(error);
@@ -193,9 +223,17 @@ abstract class BaseApiService<T, ID = string> {
    * @param config - Optional axios request configuration
    * @returns Promise with API response containing the updated entity
    */
-  async patch(id: ID, entity: Partial<T>, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async patch(
+    id: ID,
+    entity: Partial<T>,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     try {
-      const response = await this.axios.patch<T>(`${this.resourceUrl}/${id}`, entity, config);
+      const response = await this.axios.patch<T>(
+        `${this.resourceUrl}/${id}`,
+        entity,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<T>(error);
@@ -208,9 +246,15 @@ abstract class BaseApiService<T, ID = string> {
    * @param config - Optional axios request configuration
    * @returns Promise with API response indicating success or failure
    */
-  async delete(id: ID, config?: AxiosRequestConfig): Promise<ApiResponse<void>> {
+  async delete(
+    id: ID,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<void>> {
     try {
-      const response = await this.axios.delete<void>(`${this.resourceUrl}/${id}`, config);
+      const response = await this.axios.delete<void>(
+        `${this.resourceUrl}/${id}`,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<void>(error);
@@ -223,9 +267,15 @@ abstract class BaseApiService<T, ID = string> {
    * @param config - Optional axios request configuration
    * @returns Promise with API response containing the result
    */
-  async customGet<R>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<R>> {
+  async customGet<R>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<R>> {
     try {
-      const response = await this.axios.get<R>(`${this.resourceUrl}/${url}`, config);
+      const response = await this.axios.get<R>(
+        `${this.resourceUrl}/${url}`,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<R>(error);
@@ -245,14 +295,17 @@ abstract class BaseApiService<T, ID = string> {
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<R>> {
     try {
-      const response = await this.axios.post<R>(`${this.resourceUrl}/${url}`, data, config);
+      const response = await this.axios.post<R>(
+        `${this.resourceUrl}/${url}`,
+        data,
+        config
+      );
       return this.formatResponse(response);
-      
     } catch (error) {
       return this.handleError<R>(error);
     }
   }
-  
+
   /**
    * Perform a custom PUT request
    * @param url - Endpoint URL (will be appended to resourceUrl)
@@ -266,13 +319,17 @@ abstract class BaseApiService<T, ID = string> {
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<R>> {
     try {
-      const response = await this.axios.put<R>(`${this.resourceUrl}/${url}`, data, config);
+      const response = await this.axios.put<R>(
+        `${this.resourceUrl}/${url}`,
+        data,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<R>(error);
     }
   }
-  
+
   /**
    * Perform a custom PATCH request
    * @param url - Endpoint URL (will be appended to resourceUrl)
@@ -286,22 +343,32 @@ abstract class BaseApiService<T, ID = string> {
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<R>> {
     try {
-      const response = await this.axios.patch<R>(`${this.resourceUrl}/${url}`, data, config);
+      const response = await this.axios.patch<R>(
+        `${this.resourceUrl}/${url}`,
+        data,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<R>(error);
     }
   }
-  
+
   /**
    * Perform a custom DELETE request
    * @param url - Endpoint URL (will be appended to resourceUrl)
    * @param config - Optional axios request configuration
    * @returns Promise with API response containing the result
    */
-  async customDelete<R>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<R>> {
+  async customDelete<R>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<R>> {
     try {
-      const response = await this.axios.delete<R>(`${this.resourceUrl}/${url}`, config);
+      const response = await this.axios.delete<R>(
+        `${this.resourceUrl}/${url}`,
+        config
+      );
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<R>(error);

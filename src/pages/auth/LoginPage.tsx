@@ -21,7 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '../../features/authentication/hooks/auth.hook';
+import { useAuth } from '../../features/authentication';
 
 interface LoginFormData {
   email: string;

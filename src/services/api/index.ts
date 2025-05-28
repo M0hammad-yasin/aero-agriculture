@@ -24,7 +24,6 @@ export const createHttpClient = (config: HttpClientConfig): HttpClient => {
  */
 export const getApiBaseUrl = (): string => {
   return import.meta.env.VITE_APP_API_URL || 
-         process.env.REACT_APP_API_URL || 
          'http://localhost:3000';
 };
 
