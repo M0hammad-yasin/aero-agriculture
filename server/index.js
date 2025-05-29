@@ -1,7 +1,12 @@
 // server/index.js
+
 const express = require("express");
+const connectDb = require("./src/config/db");
 const app = express();
-const PORT = process.env.PORT || 5000;
+const config = require("./src/config/config");
+const PORT = config.PORT || 3000;
+// Connect to the database
+connectDb();
 
 // Middleware to parse JSON
 app.use(express.json());
