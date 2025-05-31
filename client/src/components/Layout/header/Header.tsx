@@ -30,7 +30,7 @@ import {
 import { FiBell,FiUser, FiEdit, FiLogOut, FiPower } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useAuthStore } from '../../../store/useAuthStore';
+import { useAuthStore } from '../../../features/authentication/store/useAuthStore';
 import { useLayoutStore } from '../../../store/useLayoutStore';
 import CollapsibleButton from '../CollapsibleButton';
 import ColorModeSwitch from './ColorModeSwitch';

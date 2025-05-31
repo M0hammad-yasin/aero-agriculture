@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuthStore } from '../../store/useAuthStore';
+import { useAuthStore } from '../../features/authentication/store/useAuthStore';
 
 interface ProtectedRouteProps {
   redirectPath?: string;

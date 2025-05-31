@@ -20,7 +20,7 @@ import {
   Link,
 } from '@chakra-ui/react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../features/authentication';
 
 interface LoginFormData {
@@ -35,6 +35,7 @@ interface LoginFormErrors {
 
 const LoginPage = () => {
   const toast = useToast();
+  const navigate = useNavigate();
   const { login, isLoading, error: authError } = useAuth();
   
   const [formData, setFormData] = useState<LoginFormData>({
@@ -90,11 +91,12 @@ const LoginPage = () => {
     if (!validateForm()) return;
     
     try {
-      await login({
+
+      const loginn=await login({
         email: formData.email,
         password: formData.password,
       });
-      
+      console.log("loginpage99 : ",loginn);
       toast({
         title: 'Login successful',
         description: 'Welcome to AeroAgriculture',
@@ -102,6 +104,7 @@ const LoginPage = () => {
         duration: 3000,
         isClosable: true,
       });
+      navigate('/dashboard');
     } catch (error) {
       console.log(error);
       // Error is already handled in the useAuth hook

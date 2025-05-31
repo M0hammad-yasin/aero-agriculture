@@ -1,5 +1,6 @@
 import { User } from '../../../models/auth-model';
 import { create } from 'zustand';
+import {mountStoreDevtool} from 'simple-zustand-devtools';
 import { persist,PersistOptions } from 'zustand/middleware';
 import { useLayoutStore } from '../../../store/useLayoutStore';
 
@@ -161,7 +162,9 @@ export const useAuthStore = create(
     persistOptions
   )
 );
-
+if (process.env.NODE_ENV === 'development') {
+  mountStoreDevtool('CounterStore', useAuthStore);
+}
 // Selectors for better performance
 export const useAuthUser = () => useAuthStore((state) => state.user);
 export const useAuthLoading = () => useAuthStore((state) => state.isLoading);

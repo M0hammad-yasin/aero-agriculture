@@ -10,6 +10,7 @@ import {
  */
 export interface ApiResponse<T> {
   data: T | null;
+  message:string,
   error: string | null;
   status: number;
   isSuccess: boolean;
@@ -71,6 +72,7 @@ abstract class BaseApiService<T, ID = string> {
       console.error(`API Error (${status}):`, message);
 
       return {
+        message,
         data: null,
         error: message,
         status,
@@ -81,10 +83,10 @@ abstract class BaseApiService<T, ID = string> {
     // Handle non-axios errors
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";
-    console.error("Non-Axios Error:", errorMessage);
 
     return {
       data: null,
+      message: errorMessage,
       error: errorMessage,
       status: 500,
       isSuccess: false,
@@ -96,9 +98,24 @@ abstract class BaseApiService<T, ID = string> {
    * @param response - The axios response object
    * @returns Formatted API response with data
    */
-  protected formatResponse<R>(response: AxiosResponse<R>): ApiResponse<R> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected formatResponse<R>(response: AxiosResponse<any>): ApiResponse<R> {
+    // Check if response.data already has the structure we expect from the server
+    if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data && 'data' in response.data) {
+      // Server already provides a structured response, extract and use it directly
+      return {
+        data: response.data.data as R,
+        message: response.data.message || '',
+        error: response.data.error || null,
+        status: response.status,
+        isSuccess: response.data.isSuccess
+      };
+    }
+    
+    // Fallback to the original implementation if response.data doesn't have the expected structure
     return {
-      data: response.data,
+      data: response.data as R,
+      message: '',
       error: null,
       status: response.status,
       isSuccess: true,
@@ -300,6 +317,7 @@ abstract class BaseApiService<T, ID = string> {
         data,
         config
       );
+      
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<R>(error);

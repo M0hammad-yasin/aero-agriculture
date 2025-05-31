@@ -58,10 +58,9 @@ export const useAuth = () => {
     
     setLoading(true);
     clearError();
-    
     try {
       const response = await authService.login(credentials);
-      
+      console.log(response);
       if (response.isSuccess && response.data) {
         setLogin(response.data?.user);
         return { success: true, user: response.data?.user };

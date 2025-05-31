@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "../features/authentication/store/useAuthStore";
 import LoginPage from "../pages/auth/LoginPage";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import DashboardLayout from "../components/Layout/DashboardLayout";
@@ -7,7 +7,6 @@ import DashboardContent from "../components/Dashboard/DashboardContent";
 
 const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
   return (
     <Routes>
       {/* Public routes */}

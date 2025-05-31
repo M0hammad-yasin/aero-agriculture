@@ -1,20 +1,16 @@
 import { create } from 'zustand';
-
-// Mock user data - replace with actual user data from authentication system
-const mockUser = {
-  name: 'Demo User',
-  image: ''
-};
+import { User } from '../models/auth-model';
 
 interface LayoutState {
   collapsed: boolean;
-  user: { name: string; image?: string } | null;
+  user: User | null;
   toggleSidebar: () => void;
   // Add other shared state properties and actions here if needed
 }
-
-export const useLayoutStore = create<LayoutState>((set) => ({
+export const useLayoutStore = create<LayoutState>((set) => (
+  
+  {
+    user:null,
   collapsed: false,
-  user: mockUser, // Initialize with mock user data
   toggleSidebar: () => set((state) => ({ collapsed: !state.collapsed })),
 }));
