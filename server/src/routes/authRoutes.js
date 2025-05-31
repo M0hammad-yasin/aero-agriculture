@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { register, login } = require('../controllers/authController');
+const { register, login, refreshToken, logout } = require('../controllers/authController');
+const auth = require('../middleware/auth');
+const User = require('../models/User');
 
 // @route   POST api/auth/register
 // @desc    Register user
@@ -11,5 +13,52 @@ router.post('/register', register);
 // @desc    Authenticate user & get token (Login)
 // @access  Public
 router.post('/login', login);
+
+// @route   POST api/auth/refresh
+// @desc    Refresh access token using refresh token
+// @access  Public
+router.post('/refresh', refreshToken);
+
+// @route   POST api/auth/logout
+// @desc    Logout user and invalidate refresh token
+// @access  Public
+router.post('/logout', logout);
+
+// @route   GET api/auth/user
+// @desc    Get user data
+// @access  Private
+router.get('/user', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password -refreshTokens');
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        isSuccess: false,
+        status: 404
+      });
+    }
+    
+    res.json({
+      isSuccess: true,
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.profileImg,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      },
+      error: null,
+      status: 200
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      error: 'Server error',
+      isSuccess: false,
+      status: 500
+    });
+  }
+});
 
 module.exports = router;

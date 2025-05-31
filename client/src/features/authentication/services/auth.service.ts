@@ -29,7 +29,7 @@ class AuthService extends BaseApiService<User> {
   async login(loginData: LoginRequest): Promise<ApiResponse<AuthResponse>> {
     try {
       const response = await this.customPost<LoginRequest, AuthResponse>('login', loginData);
-      
+      console.log(response);
       if (response.isSuccess && response.data) {
         // Store tokens securely
         this.setToken(response.data.accessToken);
