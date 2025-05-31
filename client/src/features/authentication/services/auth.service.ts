@@ -1,4 +1,4 @@
-import { BaseApiService, createDefaultHttpClient } from '../../../services/api';
+import { BaseApiService, axiosInstance } from '../../../services/api';
 import { 
   User, 
   LoginRequest, 
@@ -16,10 +16,9 @@ class AuthService extends BaseApiService<User> {
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
 
   constructor() {
-    const httpClient = createDefaultHttpClient();
-    const axios = httpClient.getInstance();
-    const baseUrl = '/api/v1/auth';
-    super(axios, baseUrl);
+   
+    const baseUrl = '/auth';
+    super(axiosInstance, baseUrl);
   }
 
   /**

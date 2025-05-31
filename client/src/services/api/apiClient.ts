@@ -9,7 +9,7 @@ class ApiClient {
   private httpClient: HttpClient;
 
   private constructor() {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+    const apiUrl = 'http://localhost:3000/api';
     
     this.httpClient = new HttpClient({
       baseURL: apiUrl,
