@@ -4,25 +4,23 @@ const User = require('../models/User');
 
 // User registration
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name,profileImg, email, password } = req.body;
 
   try {
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: 'User already exists' });
     }
-
-    user = new User({
+    const tempUser = {
       name,
       email,
       password,
-    });
-
+      ...(profileImg && { profileImg })
+    }
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
+    tempUser.password = await bcrypt.hash(password, salt);
+    user = new User(tempUser);
     await user.save();
-
     const payload = {
       user: {
         id: user.id,
@@ -47,6 +45,7 @@ exports.register = async (req, res) => {
 // User login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+  console.log(req.body)
 
   try {
     let user = await User.findOne({ email });
