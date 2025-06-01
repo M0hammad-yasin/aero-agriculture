@@ -32,6 +32,14 @@ export {
   USER_KEY
 } from './utils/auth.utils';
 
+// Components
+export {
+  LoginForm,
+  LoginHeader,
+  LoginLayout,
+  PasswordInput,
+} from './components';
+
 // Types (re-export from models)
 export type {
   User,

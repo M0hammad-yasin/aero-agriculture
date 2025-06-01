@@ -9,7 +9,6 @@ import {
   HStack,
   VStack,
   IconButton,
-  Icon,
   Spacer,
   Tabs,      
   TabList,   
@@ -126,7 +125,7 @@ const PlantGrowth = () => {
           </Text>
         </Flex>
 
-        {/* <Box  p={5} borderRadius="lg">
+        <Box  p={5} borderRadius="lg">
           <HStack justify="space-between" align="center" mb={4}>
             {currentPlant.stages.map((stage, index) => (
               <Text
@@ -179,7 +178,7 @@ const PlantGrowth = () => {
               colorScheme="teal"
             />
           </Flex>
-        </Box> */}
+        </Box>
       </DashboardVStack>
     </DashboardContainer>
   );
