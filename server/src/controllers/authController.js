@@ -308,7 +308,7 @@ exports.login = async (req, res) => {
     expiresAt.setMinutes(expiresAt.getMinutes() + 15); // 15 minutes from now
     
     // Return response in format expected by client
-    res.json({
+    res.status(200).json({
       isSuccess: true,
       data: {
         user: {
@@ -324,8 +324,8 @@ exports.login = async (req, res) => {
         expiresAt: expiresAt.toISOString()
       },
       error: null,
-      status: 200
     });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
