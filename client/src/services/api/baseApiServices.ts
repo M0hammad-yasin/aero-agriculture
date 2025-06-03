@@ -65,7 +65,7 @@ abstract class BaseApiService<T, ID = string> {
     if (error instanceof AxiosError) {
       const status = error.response?.status || (error.request ? 503 : 500);
       const message =
-        error.response?.data?.message ||
+        error.response?.data?.error ||
         error.message ||
         "Unknown error occurred";
 
@@ -317,7 +317,6 @@ abstract class BaseApiService<T, ID = string> {
         data,
         config
       );
-      
       return this.formatResponse(response);
     } catch (error) {
       return this.handleError<R>(error);

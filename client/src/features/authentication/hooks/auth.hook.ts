@@ -86,9 +86,7 @@ export const useAuth = () => {
     
     try {
       const {isSuccess,data,error} = await authService.register(userData);
-      
       if (isSuccess && data?.user) {
-        setLogin(data?.user);
         return { success: isSuccess, user: data.user };
       } else {
         const errorMsg = error || 'Registration failed. Invalid response from server.';
@@ -103,7 +101,7 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  }, [isLoading, setLoading, clearError, setLogin, setError]);
+  }, [isLoading, setLoading, clearError, setError]);
 
   const logout = useCallback(async () => {
     if (isLoading) return;

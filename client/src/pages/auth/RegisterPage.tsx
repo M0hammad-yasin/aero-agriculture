@@ -2,19 +2,19 @@ import React from 'react';
 import { VStack } from '@chakra-ui/react';
 import {
   LoginLayout,
-  LoginHeader,
-  LoginForm
+  RegisterHeader,
+  RegisterForm
 } from '../../features/authentication/components';
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   return (
     <LoginLayout>
       <VStack spacing={10} align={"stretch"}>
-        <LoginHeader />
-        <LoginForm />
+        <RegisterHeader />
+        <RegisterForm />
       </VStack>
     </LoginLayout>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

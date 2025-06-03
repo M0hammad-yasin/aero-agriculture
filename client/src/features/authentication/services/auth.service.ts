@@ -52,6 +52,7 @@ class AuthService extends BaseApiService<User> {
     try {
       return await this.customPost<RegisterRequest, AuthResponse>('register', registerData);
     } catch (error) {
+      console.log("authservice 55", error);
       return this.handleError<AuthResponse>(error);
     }
   }

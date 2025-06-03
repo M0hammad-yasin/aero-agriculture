@@ -24,6 +24,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   name: string;
   email: string;
+  profileImg?:string;
   password: string;
   confirmPassword: string;
 }

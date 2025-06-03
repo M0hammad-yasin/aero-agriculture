@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "../features/authentication/store/useAuthStore";
 import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import DashboardLayout from "../components/Layout/DashboardLayout";
 import DashboardContent from "../components/Dashboard/DashboardContent";
@@ -11,6 +12,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
       
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>

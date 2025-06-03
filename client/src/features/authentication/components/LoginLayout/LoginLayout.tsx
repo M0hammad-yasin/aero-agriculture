@@ -16,16 +16,15 @@ export const LoginLayout: React.FC<LoginLayoutProps> = ({ children }) => {
 
   return (
     <Flex 
-      minH="100vh" 
       align="center" 
       justify="center" 
       bg={useColorModeValue('gray.50', 'gray.900')}
       backgroundImage="url('/background-body.png')"
       backgroundSize="cover"
       backgroundPosition="center"
-      backgroundRepeat="no-repeat"
+      backgroundRepeat="repeat"
     >
-      <Container maxW="4xl" py={12} px={{ base: 4, sm: 8 }}>
+      <Container maxW="2xl" py={12} px={{ base: 10, sm: 16 }}>
         <Box
           bg={bgColor}
           p={8}
