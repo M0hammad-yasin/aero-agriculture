@@ -7,13 +7,13 @@ import {
   ProfileUpdateRequest, 
   ApiResponse
 } from '../../../models/auth-model';
+import { TokenManager } from '../utils/auth.utils';
 
 /**
  * Authentication service for handling user authentication
  */
 class AuthService extends BaseApiService<User> {
   private readonly TOKEN_KEY = 'auth_token';
-  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
 
   constructor() {
    
@@ -30,11 +30,9 @@ class AuthService extends BaseApiService<User> {
     try {
       const response = await this.customPost<LoginRequest, AuthResponse>('login', loginData);
       if (response.isSuccess && response.data) {
-        // Store tokens securely
+        // Store access token in localStorage
         this.setToken(response.data.accessToken);
-        if (response.data.refreshToken) {
-          this.setRefreshToken(response.data.refreshToken);
-        }
+        // No need to store refresh token as it's handled by HTTP-only cookie
       }
       
       return response;
@@ -50,7 +48,13 @@ class AuthService extends BaseApiService<User> {
    */
   async register(registerData: RegisterRequest): Promise<ApiResponse<AuthResponse>> {
     try {
-      return await this.customPost<RegisterRequest, AuthResponse>('register', registerData);
+      const response = await this.customPost<RegisterRequest, AuthResponse>('register', registerData);
+      if (response.isSuccess && response.data) {
+        // Store access token in localStorage
+        this.setToken(response.data.accessToken);
+        // No need to store refresh token as it's handled by HTTP-only cookie
+      }
+      return response;
     } catch (error) {
       console.log("authservice 55", error);
       return this.handleError<AuthResponse>(error);
@@ -63,15 +67,17 @@ class AuthService extends BaseApiService<User> {
    */
   async logout(): Promise<ApiResponse<void>> {
     try {
+      // The server will clear the refresh token cookie
       const response = await this.customPost<void, void>('logout');
       
-      // Clear tokens regardless of API response
-      this.clearTokens();
+      // Clear access token from local storage
+      TokenManager.clearTokens();
       
       return response;
     } catch (error) {
       // Clear tokens even if logout API fails
-      this.clearTokens();
+      TokenManager.clearTokens();
+
       return this.handleError<void>(error);
     }
   }
@@ -82,7 +88,7 @@ class AuthService extends BaseApiService<User> {
    */
   async getCurrentProfile(): Promise<ApiResponse<User>> {
     try {
-      return await this.customGet<User>('users/profile');
+      return await this.customGet<User>('user/profile');
     } catch (error) {
       return this.handleError<User>(error);
     }
@@ -95,8 +101,10 @@ class AuthService extends BaseApiService<User> {
    */
   async updateProfile(profileData: ProfileUpdateRequest): Promise<ApiResponse<User>> {
     try {
-      return await this.customPut<ProfileUpdateRequest, User>('users/profile', profileData);
+      const data= await this.customPut<ProfileUpdateRequest, User>('user/profile', profileData);
+      return data;
     } catch (error) {
+
       return this.handleError<User>(error);
     }
   }
@@ -107,21 +115,12 @@ class AuthService extends BaseApiService<User> {
    */
   async refreshToken(): Promise<ApiResponse<AuthResponse>> {
     try {
-      const refreshToken = this.getRefreshToken();
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await this.customPost<{ refreshToken: string }, AuthResponse>(
-        'refresh-token', 
-        { refreshToken }
-      );
-
+      // No need to send the refresh token as it will be sent automatically as a cookie
+      const response = await this.customPost<object, AuthResponse>('refresh-token', {});
+      console.log("authservice 118", response);
       if (response.isSuccess && response.data) {
         this.setToken(response.data.accessToken);
-        if (response.data.refreshToken) {
-          this.setRefreshToken(response.data.refreshToken);
-        }
+        // Refresh token is handled by HTTP-only cookies
       }
 
       return response;
@@ -162,18 +161,6 @@ class AuthService extends BaseApiService<User> {
   }
 
   /**
-   * Get stored refresh token
-   * @returns refresh token string or null
-   */
-  getRefreshToken(): string | null {
-    try {
-      return localStorage.getItem(this.REFRESH_TOKEN_KEY);
-    } catch {
-      return null;
-    }
-  }
-
-  /**
    * Set authentication token
    * @param token - JWT token
    */
@@ -186,24 +173,13 @@ class AuthService extends BaseApiService<User> {
   }
 
   /**
-   * Set refresh token
-   * @param refreshToken - Refresh token
-   */
-  private setRefreshToken(refreshToken: string): void {
-    try {
-      localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
-    } catch (error) {
-      console.error('Failed to store refresh token:', error);
-    }
-  }
-
-  /**
-   * Clear all stored tokens
+   * Clear stored tokens
    */
   private clearTokens(): void {
     try {
+      // Only clear the access token from localStorage
+      // The refresh token is handled by the HTTP-only cookie
       localStorage.removeItem(this.TOKEN_KEY);
-      localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     } catch (error) {
       console.error('Failed to clear tokens:', error);
     }

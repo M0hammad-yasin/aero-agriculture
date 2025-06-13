@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import { LoginRequest, RegisterRequest } from '../../../models/auth-model';
+import { LoginRequest, ProfileUpdateRequest, RegisterRequest } from '../../../models/auth-model';
 import authService from '../services';
 
 
@@ -24,6 +24,8 @@ export const useAuth = () => {
   // Initialize auth state on mount
   useEffect(() => {
     const initializeAuth = async () => {
+    
+
       if (isInitialized) return;
       
       setLoading(true);
@@ -31,6 +33,7 @@ export const useAuth = () => {
         const isAuth = await authService.isAuthenticated();
         if (isAuth) {
           const userProfile = await authService.getCurrentProfile();
+          console.log("auth hook 34: ",userProfile.data);
           if (userProfile.data) {
             setLogin(userProfile.data);
           } else {
@@ -60,7 +63,6 @@ export const useAuth = () => {
     clearError();
     try {
       const response = await authService.login(credentials);
-      console.log(response);
       if (response.isSuccess && response.data) {
         setLogin(response.data?.user);
         return { success: true, user: response.data?.user };
@@ -127,8 +129,9 @@ export const useAuth = () => {
     clearError();
     
     try {
+
       const {data,isSuccess,error} = await authService.getCurrentProfile();;
-      
+      console.log("auth hook 131",data)
       if (isSuccess && data) {
         setUser(data);
         return { success: true, user: data };
@@ -148,21 +151,22 @@ export const useAuth = () => {
     }
   }, [isLoading, isAuthenticated, setLoading, clearError, setUser, setError, logout]);
 
-  const updateProfile = useCallback(async (userData: Partial<RegisterRequest>) => {
+  const updateProfile = useCallback(async (userData: ProfileUpdateRequest) => {
     if (isLoading || !isAuthenticated) return { success: false, error: 'Not authenticated' };
     
     setLoading(true);
     clearError();
     
     try {
-      const {data,isSuccess,error} = await authService.updateProfile(userData);
-      
+      const {data,isSuccess,error,status} = await authService.updateProfile(userData);
       if (isSuccess && data) {
         setUser(data);
         return { success: true, user: data };
       } else {
         const errorMsg = error||'Failed to update profile';
         setError(errorMsg);
+        if(status===401){ 
+          logout();}
         return { success: false, error: errorMsg };
       }
     } catch (error) {
@@ -184,7 +188,7 @@ export const useAuth = () => {
     try {
       const {isSuccess,data,error} = await authService.refreshToken();
       
-      if (isSuccess && data?.refreshToken) {
+      if (isSuccess && data) {
         // Fetch updated user profile after token refresh
         const response = await authService.getCurrentProfile();
         if (response.isSuccess && response.data) {
@@ -194,7 +198,7 @@ export const useAuth = () => {
       } else {
         setError(error || 'Failed to refresh token');
         await logout();
-        return { success: false, error: 'Session expired. Please login again.' };
+        return { success: false, error: error || 'Session expired. Please login again.' };
       }
     } catch (error) {
       console.error('Token refresh failed:', error);

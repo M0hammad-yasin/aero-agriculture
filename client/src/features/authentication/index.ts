@@ -29,7 +29,7 @@ export {
   StorageUtils,
   TOKEN_KEY,
   REFRESH_TOKEN_KEY,
-  USER_KEY
+  AUTH_STORAGE as USER_KEY
 } from './utils/auth.utils';
 
 // Components

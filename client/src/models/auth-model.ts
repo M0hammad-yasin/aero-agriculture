@@ -24,7 +24,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   name: string;
   email: string;
-  profileImg?:string;
+  profileImg?:File;
   password: string;
   confirmPassword: string;
 }
@@ -35,7 +35,7 @@ export interface RegisterRequest {
 export interface AuthResponse {
   user: User;
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
   expiresAt: string;
 }
 
@@ -44,10 +44,9 @@ export interface AuthResponse {
  */
 export interface ProfileUpdateRequest {
   name?: string;
+  id:string|null;
   email?: string;
-  image?: string;
-  currentPassword?: string;
-  newPassword?: string;
+  profileImg?:File|null;
 }
 export interface ApiResponse<T> {
   data: T | null;

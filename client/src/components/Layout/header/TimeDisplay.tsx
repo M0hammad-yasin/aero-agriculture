@@ -1,6 +1,5 @@
 import { Text } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
-
 const TimeDisplay = () => {
   const [time, setTime] = useState(new Date());
 

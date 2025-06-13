@@ -9,7 +9,6 @@ type DashboardLayoutProps = {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const collapsed = useLayoutStore((state) => state.collapsed);
-  const user = useLayoutStore((state) => state.user);
   const sidebarWidth = collapsed ? "60px" : "200px";
 
   return (
@@ -32,7 +31,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <Sidebar />
       </GridItem>
       <GridItem area="main"position="relative" zIndex={1}>
-        <Header user={user} /> {/* Pass user from store */}
+        <Header />
         <Box as="main" p={4} minH="calc(100vh - 64px)">
           {children}
         </Box>

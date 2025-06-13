@@ -1,4 +1,6 @@
 import axios, { AxiosInstance,  } from 'axios';
+import { ApiResponse, AuthResponse } from '../../models/auth-model';
+import { TokenManager } from '../../features/authentication';
 
 /**
  * Configuration for the HTTP client
@@ -23,6 +25,7 @@ class HttpClient {
         'Content-Type': 'application/json',
         ...config.headers,
       },
+      withCredentials: true, // Enable sending cookies with requests
     });
 
     this.setupInterceptors();
@@ -36,8 +39,10 @@ class HttpClient {
     this.instance.interceptors.request.use(
       (config) => {
         // Get token from localStorage using consistent key
-        const token = localStorage.getItem('auth_token');
-        
+        const token = TokenManager.getToken();
+        if(!token){
+          TokenManager.clearTokens();
+        }
         // If token exists and is valid, add it to the headers
         if (token && config.headers) {
           try {
@@ -55,7 +60,6 @@ class HttpClient {
         return config;
       },
       (error) => {
-        console.error('Request interceptor error:', error);
         return Promise.reject(error);
       }
     );
@@ -65,48 +69,44 @@ class HttpClient {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        
+
+        console.log("73",error);
         // Handle common error scenarios
         if (error.response) {
           const status = error.response.status;
           
           // Handle 401 Unauthorized
-          if (status === 401 && !originalRequest._retry) {
+          if (status === 401 && !(originalRequest._retry)&&
+          !originalRequest.url.includes('/auth/refresh-token') ) {
             originalRequest._retry = true;
-            
-            // Try to refresh token first
-            const refreshToken = localStorage.getItem('refresh_token');
-            if (refreshToken) {
-              try {
-                // Attempt token refresh
-                const refreshResponse = await this.instance.post('/auth/refresh', {
-                  refreshToken
-                });
-                
-                if (refreshResponse.data?.token) {
-                  localStorage.setItem('auth_token', refreshResponse.data.token);
-                  // Retry original request with new token
-                  originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.token}`;
-                  return this.instance(originalRequest);
-                }
-              } catch (refreshError) {
-                console.error('Token refresh failed:', refreshError);
+            try {
+              // Attempt token refresh - the cookie will be sent automatically
+              const refreshResponse = await this.instance.post<ApiResponse<AuthResponse>>('/auth/refresh-token');
+         
+              if (refreshResponse.data.data?.accessToken) {
+                // Store the new access token
+                localStorage.setItem('auth_token', refreshResponse.data.data.accessToken);
+                // Retry original request with new token
+                originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.data.accessToken}`;
+                return this.instance(originalRequest);
               }
+            } catch (refreshError) {
+              console.error('Token refresh failed:', refreshError);
             }
             
             // Clear auth data and redirect to login
             localStorage.removeItem('auth_token');
-            localStorage.removeItem('refresh_token');
+            // No need to remove refresh_token from localStorage as it's now handled by HTTP-only cookies
             
             // Only redirect if we're not already on the login page
-            if (!window.location.pathname.includes('/login')) {
-              window.location.href = '/login';
-            }
+            // if (!window.location.pathname.includes('/login')) {
+            //   window.location.href = '/login';
+            // }
           }
           
           // Handle 403 Forbidden
           if (status === 403) {
-            console.error('Access forbidden - insufficient permissions');
+            console.error('Access forbidden - insufficient permissions : ',error.response?.data);
           }
           
           // Handle 404 Not Found

@@ -70,10 +70,9 @@ abstract class BaseApiService<T, ID = string> {
         "Unknown error occurred";
 
       console.error(`API Error (${status}):`, message);
-
       return {
-        message,
         data: null,
+        message,
         error: message,
         status,
         isSuccess: false,
@@ -95,31 +94,31 @@ abstract class BaseApiService<T, ID = string> {
 
   /**
    * Format successful API responses
-   * @param response - The axios response object
+   * @param axiosResponse - The axios response object
    * @returns Formatted API response with data
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected formatResponse<R>(response: AxiosResponse<any>): ApiResponse<R> {
-    // Check if response.data already has the structure we expect from the server
-    if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data && 'data' in response.data) {
-      // Server already provides a structured response, extract and use it directly
-      return {
-        data: response.data.data as R,
-        message: response.data.message || '',
-        error: response.data.error || null,
-        status: response.status,
-        isSuccess: response.data.isSuccess
-      };
-    }
-    
+  protected formatResponse<R>(axiosResponse: AxiosResponse<any>): ApiResponse<R> {
     // Fallback to the original implementation if response.data doesn't have the expected structure
-    return {
-      data: response.data as R,
+    let response={
+      data: axiosResponse.data as R,
       message: '',
       error: null,
-      status: response.status,
+      status: axiosResponse.status,
       isSuccess: true,
     };
+    // Check if response.data already has the structure we expect from the server
+    if (axiosResponse.data &&  typeof axiosResponse.data === 'object' && 'isSuccess' in axiosResponse.data && 'data' in axiosResponse.data) {
+      // Server already provides a structured response, extract and use it directly
+      response= {
+        data: axiosResponse.data.data as R,
+        message: axiosResponse.data.message || '',
+        error: axiosResponse.data.error || null,
+        status: axiosResponse.status,
+        isSuccess: axiosResponse.data.isSuccess
+      };
+    }
+    return response;
   }
 
   /**

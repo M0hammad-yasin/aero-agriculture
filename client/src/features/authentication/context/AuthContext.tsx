@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useAuth } from '../hooks/auth.hook';
-import { User, LoginRequest, RegisterRequest } from '../../../models/auth-model';
+import { User, LoginRequest, RegisterRequest, ProfileUpdateRequest } from '../../../models/auth-model';
 
 interface AuthContextType {
   // State
@@ -15,7 +15,7 @@ interface AuthContextType {
   register: (userData: RegisterRequest) => Promise<{ success: boolean; user?: User; error?: string }>;
   logout: () => Promise<void>;
   fetchUserProfile: () => Promise<{ success: boolean; user?: User; error?: string }>;
-  updateProfile: (userData: Partial<RegisterRequest>) => Promise<{ success: boolean; user?: User; error?: string }>;
+  updateProfile: (userData: ProfileUpdateRequest) => Promise<{ success: boolean; user?: User; error?: string }>;
   refreshToken: () => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
   resetAuth: () => void;

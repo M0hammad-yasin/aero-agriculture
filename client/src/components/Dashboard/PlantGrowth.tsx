@@ -27,7 +27,7 @@ const plantData = {
     image: carrotImage,
     stages: ['Seed', 'Sprout', 'Veg', 'Flower', 'Harvest'],
     currentStageIndex: 2, // Veg
-    health: 'Healthy',
+    health: 'good',
   },
   strawberry: {
     name: 'Strawberry',

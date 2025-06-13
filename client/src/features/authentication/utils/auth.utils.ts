@@ -3,7 +3,7 @@ import { User } from '../../../models/auth-model';
 // Token storage keys
 export const TOKEN_KEY = 'auth_token';
 export const REFRESH_TOKEN_KEY = 'refresh_token';
-export const USER_KEY = 'auth_user';
+export const AUTH_STORAGE = 'auth-storage';
 interface JwtPayload {
     exp?: number; // Optional, since some tokens might not have it
     [key: string]: unknown; // Allow additional properties
@@ -36,36 +36,12 @@ export class TokenManager {
   }
 
   /**
-   * Store refresh token
-   */
-  static setRefreshToken(token: string): void {
-    try {
-      localStorage.setItem(REFRESH_TOKEN_KEY, token);
-    } catch (error) {
-      console.error('Failed to store refresh token:', error);
-    }
-  }
-
-  /**
-   * Get refresh token
-   */
-  static getRefreshToken(): string | null {
-    try {
-      return localStorage.getItem(REFRESH_TOKEN_KEY);
-    } catch (error) {
-      console.error('Failed to retrieve refresh token:', error);
-      return null;
-    }
-  }
-
-  /**
    * Clear all authentication tokens
    */
   static clearTokens(): void {
     try {
       localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(REFRESH_TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(AUTH_STORAGE);
     } catch (error) {
       console.error('Failed to clear auth tokens:', error);
     }
@@ -76,14 +52,6 @@ export class TokenManager {
    */
   static hasToken(): boolean {
     const token = this.getToken();
-    return token !== null && token.trim() !== '';
-  }
-
-  /**
-   * Check if refresh token exists and is not empty
-   */
-  static hasRefreshToken(): boolean {
-    const token = this.getRefreshToken();
     return token !== null && token.trim() !== '';
   }
 

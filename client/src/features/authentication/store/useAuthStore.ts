@@ -2,7 +2,6 @@ import { User } from '../../../models/auth-model';
 import { create } from 'zustand';
 import {mountStoreDevtool} from 'simple-zustand-devtools';
 import { persist,PersistOptions } from 'zustand/middleware';
-import { useLayoutStore } from '../../../store/useLayoutStore';
 
 interface AuthState {
   user: User | null;
@@ -93,12 +92,6 @@ export const useAuthStore = create(
           isLoading: false,
         });
 
-        // Update the layout store user as well
-        try {
-          useLayoutStore.setState({ user });
-        } catch (error) {
-          console.error('Failed to update layout store:', error);
-        }
       },
       
       logout: () => {
@@ -108,14 +101,7 @@ export const useAuthStore = create(
           error: null,
           isLoading: false,
         });
-        
-        // Update the layout store user as well
-        try {
-          useLayoutStore.setState({ user: null });
-        } catch (error) {
-          console.error('Failed to update layout store:', error);
-        }
-      },
+                      },
       
       setLoading: (loading: boolean) => {
         set({ isLoading: loading });
@@ -136,12 +122,6 @@ export const useAuthStore = create(
           error: null 
         });
         
-        // Update the layout store user as well
-        try {
-          useLayoutStore.setState({ user });
-        } catch (error) {
-          console.error('Failed to update layout store:', error);
-        }
       },
       
       initialize: () => {
@@ -150,14 +130,7 @@ export const useAuthStore = create(
       
       reset: () => {
         set(initialState);
-        
-        // Clear layout store as well
-        try {
-          useLayoutStore.setState({ user: null });
-        } catch (error) {
-          console.error('Failed to clear layout store:', error);
-        }
-      },
+              },
     }),
     persistOptions
   )

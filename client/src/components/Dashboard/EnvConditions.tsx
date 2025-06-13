@@ -29,9 +29,6 @@ const EnvConditions = () => {
   const centerY = gaugeSize / 2;
   const tickOuterRadius = gaugeSize / 2 - 8; // Outer edge of ticks
   const tickInnerRadius = tickOuterRadius - tickHeight;
-  console.log("active colur : " , tickActiveColor  );
-  console.log("in active colur : " , tickInactiveColor  );
-
   return (
     <DashboardContainer>
       <DashboardVStack>
