@@ -1,5 +1,17 @@
+
 {
+  "name": "aero-agriculture-root",
+  "version": "1.0.0",
+  "scripts": {
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently -c green,blue -n SERVER,CLIENT \"npm run server\" \"npm run client\""
+  },
   "dependencies": {
     "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.5.3"
   }
 }
