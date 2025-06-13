@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, refreshToken, logout } = require('../controllers/authController');
+const { register, login, refreshToken, logout, update } = require('../controllers/authController');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 
@@ -17,7 +17,7 @@ router.post('/login', login);
 // @route   POST api/auth/refresh
 // @desc    Refresh access token using refresh token
 // @access  Public
-router.post('/refresh', refreshToken);
+router.post('/refresh-token', refreshToken);
 
 // @route   POST api/auth/logout
 // @desc    Logout user and invalidate refresh token
@@ -27,6 +27,8 @@ router.post('/logout', logout);
 // @route   GET api/auth/user
 // @desc    Get user data
 // @access  Private
+router.put('/user/profile',auth, update);
+
 router.get('/user', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -refreshTokens');
