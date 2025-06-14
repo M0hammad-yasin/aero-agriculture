@@ -2,6 +2,7 @@ import { User } from '../../../models/auth-model';
 import { create } from 'zustand';
 import {mountStoreDevtool} from 'simple-zustand-devtools';
 import { persist,PersistOptions } from 'zustand/middleware';
+import { TokenManager } from '../utils/auth.utils';
 
 interface AuthState {
   user: User | null;
@@ -95,6 +96,10 @@ export const useAuthStore = create(
       },
       
       logout: () => {
+        // Call TokenManager.clearTokens() to ensure both auth-token and auth-storage are removed
+        TokenManager.clearTokens();
+        useAuthStore.persist.clearStorage();
+        useAuthStore.getState().reset();
         set({
           user: null,
           isAuthenticated: false,
@@ -129,6 +134,8 @@ export const useAuthStore = create(
       },
       
       reset: () => {
+        console.log("hellow from useAuthStore 137 line");
+        localStorage.removeItem('auth-storage');
         set(initialState);
               },
     }),

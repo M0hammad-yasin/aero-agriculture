@@ -22,7 +22,7 @@ router.post('/refresh-token', refreshToken);
 // @route   POST api/auth/logout
 // @desc    Logout user and invalidate refresh token
 // @access  Public
-router.post('/logout', logout);
+router.post('/logout',auth, logout);
 
 // @route   GET api/auth/user
 // @desc    Get user data

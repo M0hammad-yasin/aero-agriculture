@@ -1,12 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-
-// Constants
-const ACCESS_TOKEN_EXPIRY = '1m'; // 15 minutes
-const REFRESH_TOKEN_EXPIRY = '7d'; // 7 days
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
-const REFRESH_SECRET = process.env.REFRESH_SECRET || 'your_refresh_secret';
+const config = require('../config/config');
 
 // User registration
 exports.register = async (req, res) => {
@@ -48,10 +43,10 @@ exports.register = async (req, res) => {
     };
 
     // Generate access token
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-    
+    const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: config.accessTokenExpiry });
+
     // Generate refresh token
-    const refreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const refreshToken = jwt.sign(payload, config.refreshSecret, { expiresIn: config.refreshTokenExpiry });
     
     // Calculate expiry date for refresh token
     const refreshExpiry = new Date();
@@ -176,7 +171,7 @@ exports.refreshToken = async (req, res) => {
   
   try {
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, config.refreshSecret);
     const userId = decoded.user.id;
     
     // Find user with this refresh token
@@ -210,10 +205,10 @@ exports.refreshToken = async (req, res) => {
     };
     
     // Generate new access token
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: config.accessTokenExpiry });
     
     // Generate new refresh token (token rotation for better security)
-    const newRefreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const newRefreshToken = jwt.sign(payload, config.refreshSecret, { expiresIn: config.refreshTokenExpiry });
     
     // Calculate expiry date for new refresh token
     const refreshExpiry = new Date();
@@ -281,7 +276,7 @@ exports.refreshToken = async (req, res) => {
 // Logout user
 exports.logout = async (req, res) => {
   // Try to get refresh token from request body first, then from cookie
-  let refreshToken = req.body.refreshToken || req.cookies.refreshToken;
+  let refreshToken = req.body?.refreshToken || req.cookies.refreshToken;
   
   // Clear the refresh token cookie regardless of whether a token was provided
   res.clearCookie('refreshToken', {
@@ -303,7 +298,7 @@ exports.logout = async (req, res) => {
   
   try {
     // Try to decode the token to get the user ID
-    const decoded = jwt.verify(refreshToken, REFRESH_SECRET, { ignoreExpiration: true });
+    const decoded = jwt.verify(refreshToken, config.refreshSecret, { ignoreExpiration: true });
     const userId = decoded.user.id;
     
     // Find user and remove the specific refresh token
@@ -321,7 +316,6 @@ exports.logout = async (req, res) => {
     });
   } catch (err) {
     // Even if there's an error, we consider the logout successful
-    console.error('Logout error:', err.message);
     res.json({
       isSuccess: true,
       data: null,
@@ -362,10 +356,9 @@ exports.login = async (req, res) => {
     };
 
     // Generate access token
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-    
-    // Generate refresh token
-    const refreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: config.accessTokenExpiry });
+
+    const refreshToken = jwt.sign(payload, config.refreshSecret, { expiresIn: config.refreshTokenExpiry });
     
     // Calculate expiry date for refresh token
     const refreshExpiry = new Date();

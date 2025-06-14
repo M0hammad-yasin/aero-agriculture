@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const config = require('../config/config');
 
 /**
  * Middleware to verify JWT token and protect routes
@@ -17,7 +18,7 @@ module.exports = function(req, res, next) {
 
   try {
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET );
+    const decoded = jwt.verify(token, config.jwtSecret);
     
     // Add user from payload
     req.user = decoded.user;
@@ -30,7 +31,7 @@ module.exports = function(req, res, next) {
       });
     }
     res.status(401).json({ 
-      error: 'Token is not valid', 
+      error: 'Token is not valid',
       isSuccess: false 
     });
   }
