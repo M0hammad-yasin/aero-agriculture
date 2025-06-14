@@ -1,7 +1,7 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const config = require('../config/config');
+const passwordUtils = require('../utils/passwordUtils');
+const jwtUtils = require('../utils/jwtUtils');
 
 // User registration
 exports.register = async (req, res) => {
@@ -31,26 +31,15 @@ exports.register = async (req, res) => {
       ...(profileImg && { profileImg })
     }
     
-    const salt = await bcrypt.genSalt(10);
-    tempUser.password = await bcrypt.hash(password, salt);
+    tempUser.password = await passwordUtils.hashPassword(password);
     user = new User(tempUser);
     
-    // Create payload for tokens
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-
-    // Generate access token
-    const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: config.accessTokenExpiry });
-
-    // Generate refresh token
-    const refreshToken = jwt.sign(payload, config.refreshSecret, { expiresIn: config.refreshTokenExpiry });
+    // Generate tokens
+    const accessToken = jwtUtils.generateAccessToken(user.id);
+    const refreshToken = jwtUtils.generateRefreshToken(user.id);
     
     // Calculate expiry date for refresh token
-    const refreshExpiry = new Date();
-    refreshExpiry.setDate(refreshExpiry.getDate() + 7); // 7 days from now
+    const refreshExpiry = jwtUtils.calculateRefreshExpiryDate();
     
     // Add refresh token to user document
     user.refreshTokens = [{
@@ -62,15 +51,14 @@ exports.register = async (req, res) => {
     await user.save();
     
     // Calculate expiry timestamp for client
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // 15 minutes from now
+    const expiresAt = jwtUtils.calculateExpiryDate(15);
     
     // Set refresh token in HTTP-only cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true, // Prevents JavaScript access to the cookie
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      secure: config.isProduction, // Use secure cookies in production
       sameSite: 'strict', // Prevents the cookie from being sent in cross-site requests
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: config.refreshTokenExpiry * 24 * 60 * 60 * 1000, // 7 days in milliseconds
       path: '/' // Cookie is accessible from all paths
     });
     
@@ -171,7 +159,7 @@ exports.refreshToken = async (req, res) => {
   
   try {
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, config.refreshSecret);
+    const decoded = jwtUtils.verifyToken(refreshToken, config.refreshSecret);
     const userId = decoded.user.id;
     
     // Find user with this refresh token
@@ -205,10 +193,10 @@ exports.refreshToken = async (req, res) => {
     };
     
     // Generate new access token
-    const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: config.accessTokenExpiry });
+    const accessToken = jwtUtils.generateAccessToken(user.id);
     
     // Generate new refresh token (token rotation for better security)
-    const newRefreshToken = jwt.sign(payload, config.refreshSecret, { expiresIn: config.refreshTokenExpiry });
+    const newRefreshToken = jwtUtils.generateRefreshToken(user.id);
     
     // Calculate expiry date for new refresh token
     const refreshExpiry = new Date();
@@ -224,15 +212,14 @@ exports.refreshToken = async (req, res) => {
     await user.save();
     
     // Calculate expiry timestamp for client
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // 15 minutes from now
+    const expiresAt = jwtUtils.calculateExpiryDate(15);
     
     // Set new refresh token in HTTP-only cookie
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true, // Prevents JavaScript access to the cookie
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      secure: config.isProduction, // Use secure cookies in production
       sameSite: 'strict', // Prevents the cookie from being sent in cross-site requests
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: config.refreshTokenExpiry* 24 * 60 * 60 * 1000, // 7 days in milliseconds
       path: '/' // Cookie is accessible from all paths
     });
     
@@ -298,7 +285,7 @@ exports.logout = async (req, res) => {
   
   try {
     // Try to decode the token to get the user ID
-    const decoded = jwt.verify(refreshToken, config.refreshSecret, { ignoreExpiration: true });
+    const decoded = jwtUtils.verifyToken(refreshToken, config.refreshSecret, { ignoreExpiration: true });
     const userId = decoded.user.id;
     
     // Find user and remove the specific refresh token
@@ -340,7 +327,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await passwordUtils.comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ 
         error: 'password is incorrect',
@@ -349,20 +336,13 @@ exports.login = async (req, res) => {
       });
     }
 
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-
     // Generate access token
-    const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: config.accessTokenExpiry });
+    const accessToken = jwtUtils.generateAccessToken(user.id);
 
-    const refreshToken = jwt.sign(payload, config.refreshSecret, { expiresIn: config.refreshTokenExpiry });
+    const refreshToken = jwtUtils.generateRefreshToken(user.id);
     
     // Calculate expiry date for refresh token
-    const refreshExpiry = new Date();
-    refreshExpiry.setDate(refreshExpiry.getDate() + 7); // 7 days from now
+    const refreshExpiry = jwtUtils.calculateRefreshExpiryDate();
     
     // Add refresh token to user document
     const newRefreshToken = {
@@ -384,15 +364,14 @@ exports.login = async (req, res) => {
     await user.save();
     
     // Calculate expiry timestamp for client
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // 15 minutes from now
+    const expiresAt = jwtUtils.calculateExpiryDate(15);
     
     // Set refresh token in HTTP-only cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true, // Prevents JavaScript access to the cookie
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      secure: config.isProduction, // Use secure cookies in production
       sameSite: 'strict', // Prevents the cookie from being sent in cross-site requests
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: config.refreshTokenExpiry * 24 * 60 * 60 * 1000, // 7 days in milliseconds
       path: '/' // Cookie is accessible from all paths
     });
     
