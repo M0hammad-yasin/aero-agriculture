@@ -6,8 +6,8 @@ const config = {
   isProduction: process.env.NODE_ENV === "production",
   jwtSecret: process.env.JWT_SECRET || "your_jwt_secret_key",
   refreshSecret: process.env.REFRESH_SECRET || "your_refresh_secret_key",
-  accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY || "1m",
-  refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || "2m",
+  accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY || "15m",
+  refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || "7d",
   apiBaseUrl: "/api",
 };
 module.exports = config;
