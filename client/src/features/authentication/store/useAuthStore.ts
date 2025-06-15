@@ -134,7 +134,6 @@ export const useAuthStore = create(
       },
       
       reset: () => {
-        console.log("hellow from useAuthStore 137 line");
         localStorage.removeItem('auth-storage');
         set(initialState);
               },

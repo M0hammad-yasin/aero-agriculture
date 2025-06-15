@@ -117,7 +117,6 @@ class AuthService extends BaseApiService<User> {
     try {
       // No need to send the refresh token as it will be sent automatically as a cookie
       const response = await this.customPost<object, AuthResponse>('refresh-token', {});
-      console.log("authservice 118", response);
       if (response.isSuccess && response.data) {
         this.setToken(response.data.accessToken);
         // Refresh token is handled by HTTP-only cookies
