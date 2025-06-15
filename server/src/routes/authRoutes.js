@@ -3,33 +3,33 @@ const router = express.Router();
 const { register, login, refreshToken, logout, update } = require('../controllers/authController');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
-
+const asyncWrapper=require('../utils/asyncWrapper');
 // @route   POST api/auth/register
 // @desc    Register user
 // @access  Public
-router.post('/register', register);
+router.post('/register', asyncWrapper(register));
 
 // @route   POST api/auth/login
 // @desc    Authenticate user & get token (Login)
 // @access  Public
-router.post('/login', login);
+router.post('/login', asyncWrapper(login));
 
 // @route   POST api/auth/refresh
 // @desc    Refresh access token using refresh token
 // @access  Public
-router.post('/refresh-token', refreshToken);
+router.post('/refresh-token', asyncWrapper(refreshToken));
 
 // @route   POST api/auth/logout
 // @desc    Logout user and invalidate refresh token
 // @access  Public
-router.post('/logout',auth, logout);
+router.post('/logout',auth, asyncWrapper(logout));
 
 // @route   GET api/auth/user
 // @desc    Get user data
 // @access  Private
-router.put('/user/profile',auth, update);
+router.put('/user/profile',auth, asyncWrapper(update));
 
-router.get('/user', auth, async (req, res) => {
+router.get('/user', auth, async(req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -refreshTokens');
     if (!user) {
