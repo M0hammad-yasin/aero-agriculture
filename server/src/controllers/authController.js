@@ -2,6 +2,7 @@ const User = require('../models/User');
 const config = require('../config/config');
 const passwordUtils = require('../utils/passwordUtils');
 const jwtUtils = require('../utils/jwtUtils');
+const parseExpiry = require('../utils/parseExpiry');
 
 // User registration
 exports.register = async (req, res) => {
@@ -58,7 +59,7 @@ exports.register = async (req, res) => {
       httpOnly: true, // Prevents JavaScript access to the cookie
       secure: config.isProduction, // Use secure cookies in production
       sameSite: 'strict', // Prevents the cookie from being sent in cross-site requests
-      maxAge: config.refreshTokenExpiry * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: parseExpiry(config.refreshTokenExpiry),
       path: '/' // Cookie is accessible from all paths
     });
     
@@ -219,7 +220,7 @@ exports.refreshToken = async (req, res) => {
       httpOnly: true, // Prevents JavaScript access to the cookie
       secure: config.isProduction, // Use secure cookies in production
       sameSite: 'strict', // Prevents the cookie from being sent in cross-site requests
-      maxAge: config.refreshTokenExpiry* 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: parseExpiry(config.refreshTokenExpiry), 
       path: '/' // Cookie is accessible from all paths
     });
     
@@ -371,7 +372,7 @@ exports.login = async (req, res) => {
       httpOnly: true, // Prevents JavaScript access to the cookie
       secure: config.isProduction, // Use secure cookies in production
       sameSite: 'strict', // Prevents the cookie from being sent in cross-site requests
-      maxAge: config.refreshTokenExpiry * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: parseExpiry(config.refreshTokenExpiry),
       path: '/' // Cookie is accessible from all paths
     });
     
@@ -388,9 +389,6 @@ exports.login = async (req, res) => {
           updatedAt: user.updatedAt
         },
         accessToken,
-        // Still include refreshToken in response for backward compatibility
-        // Client should be updated to use the cookie instead
-        refreshToken,
         expiresAt: expiresAt.toISOString()
       },
       error: null,
