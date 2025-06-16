@@ -66,17 +66,16 @@ class HttpClient {
 
     // Response interceptor
     this.instance.interceptors.response.use(
-      (response) => response,
+      (response) => (response),
       async (error) => {
         const originalRequest = error.config;
 
-        console.log("73",error);
         // Handle common error scenarios
         if (error.response) {
           const status = error.response.status;
           
           // Handle 401 Unauthorized
-          if (status === 401 && !(originalRequest._retry)&&
+          if (status === 401 && true && !(originalRequest._retry)&&
           !originalRequest.url.includes('/auth/refresh-token') ) {
             originalRequest._retry = true;
             try {
