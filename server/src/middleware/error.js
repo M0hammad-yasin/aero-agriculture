@@ -39,10 +39,12 @@ const error = (err, req, res, next) => {
     } else if (err.message) {
       // Use the error message if available
       data.error = err.message;
-      data.status = err.status || err.statusCode || 500;
+      data.status = err.statusCode ||  500;
     }
   
-    res.status(data.status).json(data);
+    // Make sure we're using a numeric status code
+  const statusCode = parseInt(data.status) || 500;
+  res.status(statusCode).json(data);
   };
   
   module.exports = error;

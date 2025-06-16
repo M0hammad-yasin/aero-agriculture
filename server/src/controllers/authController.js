@@ -83,8 +83,8 @@ exports.register = async (req, res) => {
   });
 };
 exports.update = async (req, res) => {
-  const { name,  email,id } = req.body;
-
+  const { name,  email, } = req.body;
+  const  id=req.user.id;
   let user=await User.findById(id);
   if(!user) return res.status(404).json({
     error: 'User not found',
@@ -108,12 +108,6 @@ exports.update = async (req, res) => {
     new: true,
     runValidators: true
   });    
-  // Create payload for tokens
-  const payload = {
-    user: {
-      id: user.id,
-    },
-  };
   res.json({
     isSuccess: true,
     data: {
