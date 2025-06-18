@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const temperatureDataSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
-  value: Number,
+  value: { type: Number, required: true },
+  deviceId: { type: String, default: 'default' },
 });
 temperatureDataSchema.index({ timestamp: 1 });
 
