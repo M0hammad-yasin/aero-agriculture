@@ -4,17 +4,7 @@ import {
   AxiosResponse,
   AxiosError,
 } from "axios";
-
-/**
- * Response wrapper for API responses
- */
-export interface ApiResponse<T> {
-  data: T | null;
-  message:string,
-  error: string | null;
-  status: number;
-  isSuccess: boolean;
-}
+import { ApiResponse } from "../../models";
 
 /**
  * Pagination parameters
@@ -64,16 +54,15 @@ abstract class BaseApiService<T, ID = string> {
   protected handleError<R>(error: unknown): ApiResponse<R> {
     if (error instanceof AxiosError) {
       const status = error.response?.status || (error.request ? 503 : 500);
-      const message =
+      const errorMsg =
         error.response?.data?.error ||
         error.message ||
         "Unknown error occurred";
 
-      console.error(`API Error (${status}):`, message);
+      console.error(`API Error (${status}):`, errorMsg);
       return {
         data: null,
-        message,
-        error: message,
+        error: errorMsg,
         status,
         isSuccess: false,
       };
@@ -85,7 +74,6 @@ abstract class BaseApiService<T, ID = string> {
 
     return {
       data: null,
-      message: errorMessage,
       error: errorMessage,
       status: 500,
       isSuccess: false,
@@ -102,7 +90,6 @@ abstract class BaseApiService<T, ID = string> {
     // Fallback to the original implementation if response.data doesn't have the expected structure
     let response={
       data: axiosResponse.data as R,
-      message: '',
       error: null,
       status: axiosResponse.status,
       isSuccess: true,
@@ -112,7 +99,6 @@ abstract class BaseApiService<T, ID = string> {
       // Server already provides a structured response, extract and use it directly
       response= {
         data: axiosResponse.data.data as R,
-        message: axiosResponse.data.message || '',
         error: axiosResponse.data.error || null,
         status: axiosResponse.status,
         isSuccess: axiosResponse.data.isSuccess
@@ -129,7 +115,7 @@ abstract class BaseApiService<T, ID = string> {
   async getAll(config?: AxiosRequestConfig): Promise<ApiResponse<T[]>> {
     try {
       const response = await this.axios.get<T[]>(this.resourceUrl, config);
-      return this.formatResponse(response);
+      return this.formatResponse<T[]>(response);
     } catch (error) {
       return this.handleError<T[]>(error);
     }
@@ -162,7 +148,7 @@ abstract class BaseApiService<T, ID = string> {
         }
       );
 
-      return this.formatResponse(response);
+      return this.formatResponse<PaginatedResponse<T>>(response);
     } catch (error) {
       return this.handleError<PaginatedResponse<T>>(error);
     }
@@ -180,7 +166,7 @@ abstract class BaseApiService<T, ID = string> {
         `${this.resourceUrl}/${id}`,
         config
       );
-      return this.formatResponse(response);
+      return this.formatResponse<T>(response);
     } catch (error) {
       return this.handleError<T>(error);
     }
@@ -202,7 +188,7 @@ abstract class BaseApiService<T, ID = string> {
         entity,
         config
       );
-      return this.formatResponse(response);
+      return this.formatResponse<T>(response);
     } catch (error) {
       return this.handleError<T>(error);
     }
@@ -226,7 +212,7 @@ abstract class BaseApiService<T, ID = string> {
         entity,
         config
       );
-      return this.formatResponse(response);
+      return this.formatResponse<T>(response);
     } catch (error) {
       return this.handleError<T>(error);
     }
@@ -250,7 +236,7 @@ abstract class BaseApiService<T, ID = string> {
         entity,
         config
       );
-      return this.formatResponse(response);
+      return this.formatResponse<T>(response);
     } catch (error) {
       return this.handleError<T>(error);
     }
@@ -265,15 +251,15 @@ abstract class BaseApiService<T, ID = string> {
   async delete(
     id: ID,
     config?: AxiosRequestConfig
-  ): Promise<ApiResponse<void>> {
+  ): Promise<ApiResponse<T>> {
     try {
       const response = await this.axios.delete<void>(
         `${this.resourceUrl}/${id}`,
         config
       );
-      return this.formatResponse(response);
+      return this.formatResponse<T>(response);
     } catch (error) {
-      return this.handleError<void>(error);
+      return this.handleError<T>(error);
     }
   }
 

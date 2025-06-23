@@ -12,13 +12,13 @@ export {
   useAuthStatus
 } from './store/useAuthStore';
 
-// Context
-export { 
-  AuthProvider, 
-  useAuthContext, 
-  withAuth, 
-//   usePermissions 
-} from './context/AuthContext';
+// // Context
+// export { 
+//   AuthProvider, 
+//   useAuthContext, 
+//   withAuth, 
+// //   usePermissions 
+// } from './context/AuthContext';
 
 // Utils
 export {

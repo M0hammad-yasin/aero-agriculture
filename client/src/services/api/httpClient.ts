@@ -1,6 +1,8 @@
-import axios, { AxiosInstance,  } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { ApiResponse, AuthResponse } from '../../models/auth-model';
-import { TokenManager } from '../../features/authentication';
+import { TokenManager } from '../../features/authentication/utils/auth.utils';
+import { navigateToLogin } from '../../utils/navigation';
+import { useAuthStore } from '../../features/authentication/store/useAuthStore';
 
 /**
  * Configuration for the HTTP client
@@ -16,6 +18,11 @@ interface HttpClientConfig {
  */
 class HttpClient {
   private instance: AxiosInstance;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (value?: unknown) => void;
+    reject: (reason?: unknown) => void;
+  }> = [];
 
   constructor(config: HttpClientConfig) {
     this.instance = axios.create({
@@ -29,6 +36,27 @@ class HttpClient {
     });
 
     this.setupInterceptors();
+  }
+
+  private processQueue(error: unknown | null = null) {
+    this.failedQueue.forEach((promise) => {
+      if (error) {
+        promise.reject(error);
+      } else {
+        promise.resolve();
+      }
+    });
+    this.failedQueue = [];
+  }
+
+  private handleTokenExpiration() {
+    // Clear tokens
+    TokenManager.clearTokens();
+    // Reset auth store state
+    const resetAuth = useAuthStore.getState().reset;
+    resetAuth();
+    // Navigate to login
+    navigateToLogin();
   }
 
   /**
@@ -53,7 +81,7 @@ class HttpClient {
           } catch (error) {
             console.error('Error setting authorization header:', error);
             // Remove invalid token
-            localStorage.removeItem('auth_token');
+            TokenManager.clearTokens();
           }
         }
         
@@ -66,7 +94,7 @@ class HttpClient {
 
     // Response interceptor
     this.instance.interceptors.response.use(
-      (response) => (response),
+      (response) => response,
       async (error) => {
         const originalRequest = error.config;
 
@@ -75,32 +103,43 @@ class HttpClient {
           const status = error.response.status;
           
           // Handle 401 Unauthorized
-          if (status === 401 && true && !(originalRequest._retry)&&
-          !originalRequest.url.includes('/auth/refresh-token') ) {
+          if (status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh-token')) {
+            if (this.isRefreshing) {
+              // If already refreshing, queue this request
+              return new Promise((resolve, reject) => {
+                this.failedQueue.push({ resolve, reject });
+              })
+                .then(() => this.instance(originalRequest))
+                .catch((err) => Promise.reject(err));
+            }
+
+            this.isRefreshing = true;
             originalRequest._retry = true;
+
             try {
               // Attempt token refresh - the cookie will be sent automatically
               const refreshResponse = await this.instance.post<ApiResponse<AuthResponse>>('/auth/refresh-token');
          
               if (refreshResponse.data.data?.accessToken) {
                 // Store the new access token
-                localStorage.setItem('auth_token', refreshResponse.data.data.accessToken);
-                // Retry original request with new token
+                TokenManager.setToken(refreshResponse.data.data.accessToken);
+                // Update authorization header
                 originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.data.accessToken}`;
+                // Process queued requests
+                this.processQueue();
+                // Retry original request
                 return this.instance(originalRequest);
+              } else {
+                this.processQueue(error);
+                this.handleTokenExpiration();
               }
             } catch (refreshError) {
               console.error('Token refresh failed:', refreshError);
+              this.processQueue(refreshError);
+              this.handleTokenExpiration();
+            } finally {
+              this.isRefreshing = false;
             }
-            
-            // Clear auth data and redirect to login
-            localStorage.removeItem('auth_token');
-            // No need to remove refresh_token from localStorage as it's now handled by HTTP-only cookies
-            
-            // Only redirect if we're not already on the login page
-            // if (!window.location.pathname.includes('/login')) {
-            //   window.location.href = '/login';
-            // }
           }
           
           // Handle 403 Forbidden
