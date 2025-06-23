@@ -15,10 +15,8 @@ import { TokenManager } from '../utils/auth.utils';
 class AuthService extends BaseApiService<User> {
   private readonly TOKEN_KEY = 'auth_token';
 
-  constructor() {
-   
-    const baseUrl = '/auth';
-    super(axiosInstance, baseUrl);
+  constructor() {   
+    super(axiosInstance, '/auth');
   }
 
   /**

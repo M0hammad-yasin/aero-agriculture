@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { LoginRequest, ProfileUpdateRequest, RegisterRequest } from '../../../models/auth-model';
 import authService from '../services';
@@ -20,6 +21,8 @@ export const useAuth = () => {
     initialize,
     reset,
   } = useAuthStore();
+
+  const navigate = useNavigate();
 
   // Initialize auth state on mount
   useEffect(() => {
@@ -119,8 +122,9 @@ export const useAuth = () => {
     } finally {
       setLogout();
       setLoading(false);
+      navigate('/login');
     }
-  }, [isLoading, setLoading, clearError, setLogout]);
+  }, [isLoading, setLoading, clearError, setLogout, navigate]);
 
   const fetchUserProfile = useCallback(async () => {
     if (isLoading || !isAuthenticated) return { success: false, error: 'Not authenticated' };
