@@ -3,12 +3,11 @@ import { Box, Center, Text, VStack, useColorModeValue, Spinner } from '@chakra-u
 import { useEnvFactors } from '../hooks';
 
 const EnvConditions = () => {
-  const { latestReadings, isLoading, error } = useEnvFactors();
-  
+  const { latestReadings, isLoading, error } = useEnvFactors();  
   // Get temperature from latest readings
   const temperatureReading = latestReadings?.temperature;
-  const temperature = temperatureReading ? temperatureReading.value : 20; // fallback to 20°C
-
+  const temperature= temperatureReading ? temperatureReading.value : 20; // fallback to 20°C
+  const unit = temperatureReading?.unit|| '°C';
   const numTicks = 45; // Updated: Requirement for 40 ticks
   const gaugeSize = 200; // px
   const tickHeight = 15; // px
@@ -120,7 +119,7 @@ const EnvConditions = () => {
               <Text fontSize="xs" color={useColorModeValue("gray.600", "gray.400")}>Room</Text>
               <Text fontSize="xs" color={useColorModeValue("gray.600", "gray.400")}>Temperature</Text>
               <Text fontSize="4xl" fontWeight="bold" lineHeight="1.2" color={useColorModeValue("gray.800", "white")}>
-                {Math.round(temperature)}°C
+                {`${Math.round(temperature)} ${unit}`}
               </Text>
             </VStack>
           </Box>

@@ -28,7 +28,7 @@ const initialState = {
   isLoading: false,
   error: null,
   isInitialized: false,
-};
+} as const;
 
 // Define persist options with proper typing
 const persistOptions: PersistOptions<AuthState> = {
@@ -92,7 +92,6 @@ export const useAuthStore = create(
           error: null,
           isLoading: false,
         });
-
       },
       
       logout: () => {
@@ -106,7 +105,7 @@ export const useAuthStore = create(
           error: null,
           isLoading: false,
         });
-                      },
+      },
       
       setLoading: (loading: boolean) => {
         set({ isLoading: loading });
@@ -126,7 +125,6 @@ export const useAuthStore = create(
           isAuthenticated: !!user,
           error: null 
         });
-        
       },
       
       initialize: () => {
@@ -136,7 +134,7 @@ export const useAuthStore = create(
       reset: () => {
         localStorage.removeItem('auth-storage');
         set(initialState);
-              },
+      },
     }),
     persistOptions
   )

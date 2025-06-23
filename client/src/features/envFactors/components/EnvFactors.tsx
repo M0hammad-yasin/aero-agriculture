@@ -15,28 +15,28 @@ const EnvFactors = () => {
       icon: WiHumidity, 
       label: 'Humidity', 
       color: 'orange.400',
-      unit: '%'
+      unit:  latestReadings?.humidity?.unit || '%'
     },
     { 
       key: 'ec' as const, 
       icon: GiFertilizerBag, 
       label: 'EC', 
       color: 'blue.400',
-      unit: 'mS/cm'
+      unit: latestReadings?.ec?.unit|| 'mS/cm'
     },
     { 
       key: 'ph' as const, 
       icon: WiBarometer, 
       label: 'PH', 
       color: 'blue.300',
-      unit: 'pH'
+      unit: latestReadings?.ph?.unit|| 'pH'
     },
     { 
       key: 'co2' as const, 
       icon: MdCo2, 
       label: 'CO2', 
       color: 'orange.300',
-      unit: 'ppm'
+      unit: latestReadings?.co2?.unit || 'ppm'
     },
   ];
 

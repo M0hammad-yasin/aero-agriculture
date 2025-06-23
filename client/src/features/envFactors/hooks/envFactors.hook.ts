@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { 
   SensorType, 
-  SensorReading,
+  
   CreateSensorReadingRequest,
   WeeklySensorStats,
   SensorReadingTypeMap
@@ -36,6 +36,7 @@ export const useEnvFactors = () => {
     
     try {
       const response = await envFactorsService.getLatestReading(sensorType);
+      if(response.error) setError(response.error);
       return response;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to fetch latest reading';
@@ -61,6 +62,7 @@ export const useEnvFactors = () => {
       if (response.isSuccess && response.data) {
         setLatestReadings(response.data);
       }
+      if(!response.isSuccess && response.error) setError(response.error)
       return response;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to fetch all latest readings';
