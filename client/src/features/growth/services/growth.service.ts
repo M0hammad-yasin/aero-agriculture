@@ -1,49 +1,38 @@
-import { AxiosInstance } from 'axios';
 import { 
-  WeeklySensorStats
-} from '../../../models/sensor.model';
-import BaseApiService from '../../../services/api/baseApiServices';
-import { ApiResponse } from '../../../models/auth-model';
-
-/**
- * Plant Growth Data Interface
- */
-export interface PlantGrowthData {
-  id: string;
-  plantType: string;
-  currentStage: string;
-  health: string;
-  plantedDate: string;
-  expectedHarvestDate: string;
-  imageUrl?: string;
-}
-
-/**
- * Growth Statistics Interface
- */
-export interface GrowthStatistics {
-  totalPlants: number;
-  healthyPlants: number;
-  plantsInFlower: number;
-  plantsReadyForHarvest: number;
-  averageGrowthRate: number;
-}
+  WeeklySensorStats,
+  PlantGrowthData,
+  GrowthStatistics,
+  IGrowthService,
+  PlantResponse,
+  PlantsResponse,
+  GrowthStatsResponse,
+  WeeklyGrowthResponse,
+  CreatePlantRequest,
+  UpdatePlantRequest,
+  PlantStage,
+  PlantHealth
+} from '../../../models';
+import {BaseApiService,axiosInstance} from '../../../services/api';
 
 /**
  * Growth Service
  * Handles API calls for plant growth data and statistics
  */
-class GrowthService extends BaseApiService<PlantGrowthData> {
-  constructor(axios: AxiosInstance) {
-    super(axios, '/growth');
+class GrowthService extends BaseApiService<PlantGrowthData> implements IGrowthService {
+  constructor() {
+    super(axiosInstance, '/growth');
   }
 
   /**
    * Get all plant growth data
    * @returns Promise with API response containing all plant data
    */
-  async getAllPlantData(): Promise<ApiResponse<PlantGrowthData[]>> {
-    return this.getAll();
+  async getAllPlantData(): Promise<PlantsResponse> {
+    const response = await this.getAll();
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response as PlantsResponse;
   }
 
   /**
@@ -51,8 +40,12 @@ class GrowthService extends BaseApiService<PlantGrowthData> {
    * @param id - Plant ID
    * @returns Promise with API response
    */
-  async getPlantDataById(id: string): Promise<ApiResponse<PlantGrowthData>> {
-    return this.getById(id);
+  async getPlantDataById(id: string): Promise<PlantResponse> {
+    const response = await this.getById(id);
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response as PlantResponse;
   }
 
   /**
@@ -60,8 +53,12 @@ class GrowthService extends BaseApiService<PlantGrowthData> {
    * @param plantData - Plant growth data
    * @returns Promise with API response
    */
-  async createPlantData(plantData: Partial<PlantGrowthData>): Promise<ApiResponse<PlantGrowthData>> {
-    return this.create(plantData);
+  async createPlantData(plantData: CreatePlantRequest): Promise<PlantResponse> {
+    const response = await this.create(plantData);
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response as PlantResponse;
   }
 
   /**
@@ -70,8 +67,12 @@ class GrowthService extends BaseApiService<PlantGrowthData> {
    * @param plantData - Updated plant data
    * @returns Promise with API response
    */
-  async updatePlantData(id: string, plantData: Partial<PlantGrowthData>): Promise<ApiResponse<PlantGrowthData>> {
-    return this.update(id, plantData);
+  async updatePlantData(id: string, plantData: UpdatePlantRequest): Promise<PlantResponse> {
+    const response = await this.update(id, plantData);
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response as PlantResponse;
   }
 
   /**
@@ -79,24 +80,33 @@ class GrowthService extends BaseApiService<PlantGrowthData> {
    * @param id - Plant ID
    * @returns Promise with API response
    */
-  async deletePlantData(id: string): Promise<ApiResponse<void>> {
-    return this.delete(id);
+  async deletePlantData(id: string):Promise<PlantResponse>{
+    const response = await this.delete(id);
+    return response;
   }
 
   /**
    * Get growth statistics
    * @returns Promise with API response containing growth statistics
    */
-  async getGrowthStatistics(): Promise<ApiResponse<GrowthStatistics>> {
-    return this.customGet<GrowthStatistics>('statistics');
+  async getGrowthStatistics(): Promise<GrowthStatsResponse> {
+    const response = await this.customGet<GrowthStatistics>('statistics');
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response ;
   }
 
   /**
    * Get weekly growth data (environmental factors affecting growth)
    * @returns Promise with API response containing weekly sensor data
    */
-  async getWeeklyGrowthData(): Promise<ApiResponse<WeeklySensorStats>> {
-    return this.customGet<WeeklySensorStats>('weekly-data');
+  async getWeeklyGrowthData(): Promise<WeeklyGrowthResponse> {
+    const response = await this.customGet<WeeklySensorStats>('weekly-data');
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response as WeeklyGrowthResponse;
   }
 
   /**
@@ -105,8 +115,12 @@ class GrowthService extends BaseApiService<PlantGrowthData> {
    * @param stage - New stage
    * @returns Promise with API response
    */
-  async updatePlantStage(id: string, stage: string): Promise<ApiResponse<PlantGrowthData>> {
-    return this.customPatch<{ stage: string }, PlantGrowthData>(`${id}/stage`, { stage });
+  async updatePlantStage(id: string, stage: PlantStage): Promise<PlantResponse> {
+    const response = await this.customPatch<{ stage: PlantStage }, PlantGrowthData>(`${id}/stage`, { stage });
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response as PlantResponse;
   }
 
   /**
@@ -115,8 +129,12 @@ class GrowthService extends BaseApiService<PlantGrowthData> {
    * @param health - Health status
    * @returns Promise with API response
    */
-  async updatePlantHealth(id: string, health: string): Promise<ApiResponse<PlantGrowthData>> {
-    return this.customPatch<{ health: string }, PlantGrowthData>(`${id}/health`, { health });
+  async updatePlantHealth(id: string, health: PlantHealth): Promise<PlantResponse> {
+    const response = await this.customPatch<{ health: PlantHealth }, PlantGrowthData>(`${id}/health`, { health });
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+    return response as PlantResponse;
   }
 }
 

@@ -22,8 +22,7 @@ import {
 } from '../../../config/ChakraStyleConfig';
 import { ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons';
 import { useGrowth } from '../hooks';
-import { PlantGrowthData } from '../services';
-
+import { PlantStage } from '../../../models';
 const plantStageIcons = {
   Seed: '🌱',
   Sprout: '🌿',
@@ -60,10 +59,9 @@ const PlantGrowth = () => {
     
     const stages = ['Seed', 'Sprout', 'Veg', 'Flower', 'Harvest'];
     const newStageIndex = Math.max(0, currentStageIndex - 1);
-    const newStage = stages[newStageIndex];
-    
+    const newStage = stages[newStageIndex] as PlantStage;
     try {
-      await updatePlantStage(currentPlant.id, newStage);
+      await updatePlantStage(currentPlant._id, newStage);
       setCurrentStageIndex(newStageIndex);
     } catch (error) {
       console.error('Failed to update plant stage:', error);
@@ -75,10 +73,10 @@ const PlantGrowth = () => {
     
     const stages = ['Seed', 'Sprout', 'Veg', 'Flower', 'Harvest'];
     const newStageIndex = Math.min(stages.length - 1, currentStageIndex + 1);
-    const newStage = stages[newStageIndex];
+    const newStage = stages[newStageIndex] as PlantStage;
     
     try {
-      await updatePlantStage(currentPlant.id, newStage);
+      await updatePlantStage(currentPlant._id, newStage);
       setCurrentStageIndex(newStageIndex);
     } catch (error) {
       console.error('Failed to update plant stage:', error);
@@ -152,7 +150,7 @@ const PlantGrowth = () => {
           <TabList>
             {plantKeys.map((plant, index) => (
               <Tab 
-                key={plant.id} 
+                key={plant._id} 
                 _selected={{ color: 'white', bg: 'brand.600' }} 
               >
                 {plant.plantType}

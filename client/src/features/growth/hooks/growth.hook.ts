@@ -1,17 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
-import { 
-  WeeklySensorStats
-} from '../../../models/sensor.model';
-import { GrowthService, PlantGrowthData, GrowthStatistics } from '../services';
-import { ApiResponse } from '../../../models/auth-model';
-import apiClient from '../../../services/api/apiClient';
-
+import { GrowthService } from '../services';
+import { ApiResponse ,WeeklySensorStats,PlantResponse,PlantGrowthData,GrowthStatistics, PlantStage, PlantHealth} from '../../../models/';
 /**
  * Hook for managing plant growth data
  */
 export const useGrowth = () => {
-  const [growthService] = useState(() => new GrowthService(apiClient));
-  
+  const [growthService] = useState(() => new GrowthService());
   // State
   const [plantData, setPlantData] = useState<PlantGrowthData[] | null>(null);
   const [growthStats, setGrowthStats] = useState<GrowthStatistics | null>(null);
@@ -72,7 +66,7 @@ export const useGrowth = () => {
   }, [growthService, clearError]);
 
   // Create new plant data
-  const createPlantData = useCallback(async (data: Partial<PlantGrowthData>): Promise<ApiResponse<PlantGrowthData>> => {
+  const createPlantData = useCallback(async (data: PlantGrowthData): Promise<ApiResponse<PlantGrowthData>> => {
     setIsLoading(true);
     clearError();
     
@@ -124,7 +118,7 @@ export const useGrowth = () => {
   }, [growthService, clearError, getAllPlantData]);
 
   // Delete plant data
-  const deletePlantData = useCallback(async (id: string): Promise<ApiResponse<void>> => {
+  const deletePlantData = useCallback(async (id: string): Promise<PlantResponse> => {
     setIsLoading(true);
     clearError();
     
@@ -200,7 +194,7 @@ export const useGrowth = () => {
   }, [growthService, clearError]);
 
   // Update plant stage
-  const updatePlantStage = useCallback(async (id: string, stage: string): Promise<ApiResponse<PlantGrowthData>> => {
+  const updatePlantStage = useCallback(async (id: string, stage: PlantStage): Promise<PlantResponse> => {
     setIsLoading(true);
     clearError();
     
@@ -226,7 +220,7 @@ export const useGrowth = () => {
   }, [growthService, clearError, getAllPlantData]);
 
   // Update plant health
-  const updatePlantHealth = useCallback(async (id: string, health: string): Promise<ApiResponse<PlantGrowthData>> => {
+  const updatePlantHealth = useCallback(async (id: string, health: PlantHealth): Promise<PlantResponse> => {
     setIsLoading(true);
     clearError();
     
