@@ -1,0 +1,1 @@
+export { useEnvFactors } from './envFactors.hook'; 

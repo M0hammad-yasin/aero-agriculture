@@ -1,9 +1,7 @@
 import { Flex, Grid, GridItem, Box } from '@chakra-ui/react';
-import EnvConditions from './EnvConditions';
-import EnvFactors from './EnvFactors';
-import PlantGrowth from './PlantGrowth';
+import { EnvConditions, EnvFactors } from '../../features/envFactors';
+import { PlantGrowth, GrowthStats } from '../../features/growth';
 import Duration from './Duration';
-import GrowthStats from './GrowthStats';
 import RightSidebar from './RightSidebar';
 
 const DashboardContent = () => {
