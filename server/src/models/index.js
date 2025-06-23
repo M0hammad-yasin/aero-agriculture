@@ -10,9 +10,11 @@ const CO2Data = require("./CO2Data");
 const SolLevelData = require("./SolLevelData");
 const WeeklyYieldData = require("./WeeklyYieldData");
 const Status = require("./Status");
-
+const Growth = require("./Growth");
+const config=require('../config/config');
 async function connectToDatabase() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/VertiBlockX");
+  const MONGO_URI = config.dbUri;
+  await mongoose.connect(MONGO_URI);
 }
 
 module.exports = {
@@ -29,4 +31,5 @@ module.exports = {
   SolLevelData,
   WeeklyYieldData,
   Status,
+  Growth
 };

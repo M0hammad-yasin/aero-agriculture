@@ -153,7 +153,6 @@ exports.refreshToken = async (req, res) => {
   const tokenIndex = user.refreshTokens.findIndex(
     token => token.token === refreshToken && token.expiresAt > new Date()
   );
-  console.log(tokenIndex);
   if (tokenIndex === -1) {
     return res.status(401).json({
       error: 'Invalid or expired refresh token',
