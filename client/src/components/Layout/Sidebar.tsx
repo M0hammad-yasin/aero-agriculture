@@ -1,5 +1,6 @@
 import { Box, VStack, Icon, Text, Flex, useColorModeValue } from '@chakra-ui/react';
 import { FiHome, FiMap, FiBarChart2, FiSettings, FiDatabase } from 'react-icons/fi';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CollapsibleButton from './CollapsibleButton';
 import { useLayoutStore } from '../../store/useLayoutStore'; // Import the Zustand store
 
@@ -7,9 +8,10 @@ interface NavItemProps {
   icon: React.ElementType;
   children: string;
   isActive?: boolean;
+  onClick?: () => void;
 }
 
-const NavItem = ({ icon, children, isActive = false }: NavItemProps) => {
+const NavItem = ({ icon, children, isActive = false, onClick }: NavItemProps) => {
   const activeBg = useColorModeValue('brand.50', 'rgba(112, 199, 36, 0.2)');
   const activeColor = useColorModeValue('brand.600', 'brand.400');
   const inactiveColor = useColorModeValue('gray.600', 'gray.400');
@@ -25,6 +27,7 @@ const NavItem = ({ icon, children, isActive = false }: NavItemProps) => {
       color={isActive ? activeColor : inactiveColor}
       bg={isActive ? activeBg : 'transparent'}
       borderRadius="md"
+      onClick={onClick}
       _hover={{
         bg: activeBg,
         color: activeColor,
@@ -41,12 +44,23 @@ const NavItem = ({ icon, children, isActive = false }: NavItemProps) => {
 };
 
 const Sidebar = () => { // Remove props
-  const collapsed= useLayoutStore((state) =>state.collapsed);
+  const collapsed = useLayoutStore((state) => state.collapsed);
   const bgColor = useColorModeValue('white', 'gray.900');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const sidebarWidth = collapsed ? '60px' : '200px';
   const logoFontSize = collapsed ? 'lg' : '2xl';
   const logoText = collapsed ? 'AA' : 'AeroAgriculture';
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: FiHome },
+    { path: '/crops', label: 'My Crops', icon: FiDatabase },
+    { path: '/field-mapping', label: 'Field Mapping', icon: FiMap },
+    { path: '/analytics', label: 'Analytics', icon: FiBarChart2 },
+    { path: '/settings', label: 'Settings', icon: FiSettings },
+  ];
 
   return (
     <Box
@@ -70,42 +84,35 @@ const Sidebar = () => { // Remove props
       transition="width 0.2s"
       display={{ base: 'none', md: 'block' }}
     >
-     { collapsed ?<Flex justify="center" mt="4" order={1}>
-        {/* CollapsibleButton now gets state and toggle from store directly */}
-        <CollapsibleButton 
-
-        />
-      </Flex>:
-      <Flex px="6" py="6" overflow='hidden' align="center" justify={collapsed ? 'center' : 'flex-start'}>
-        <Text
-
-          fontSize={logoFontSize}
-          fontWeight="semibold"
-          color="brand.500"
-          transition="font-size 0.2s"
-        >
-          {logoText}
-        </Text>
-      </Flex>}
+      {collapsed ? (
+        <Flex justify="center" mt="4" order={1}>
+          <CollapsibleButton />
+        </Flex>
+      ) : (
+        <Flex px="6" py="6" overflow='hidden' align="center" justify={collapsed ? 'center' : 'flex-start'}>
+          <Text
+            fontSize={logoFontSize}
+            fontWeight="semibold"
+            color="brand.500"
+            transition="font-size 0.2s"
+          >
+            {logoText}
+          </Text>
+        </Flex>
+      )}
 
       <VStack spacing="1" align={collapsed ? 'center' : 'stretch'} px={collapsed ? '0' : '2'} mt="6">
-        <NavItem icon={FiHome} isActive>
-          {!collapsed ? 'Dashboard' : ''}
-        </NavItem>
-        <NavItem icon={FiMap}>
-          {!collapsed ? 'Field Mapping' : ''}
-        </NavItem>
-        <NavItem icon={FiBarChart2}>
-          {!collapsed ? 'Analytics' : ''}
-        </NavItem>
-        <NavItem icon={FiDatabase}>
-          {!collapsed ? 'Crop Data' : ''}
-        </NavItem>
-        <NavItem icon={FiSettings}>
-          {!collapsed ? 'Settings' : ''}
-        </NavItem>
+        {navItems.map((item) => (
+          <NavItem
+            key={item.path}
+            icon={item.icon}
+            isActive={location.pathname === item.path}
+            onClick={() => navigate(item.path)}
+          >
+            {!collapsed ? item.label : ''}
+          </NavItem>
+        ))}
       </VStack>
-      
     </Box>
   );
 };

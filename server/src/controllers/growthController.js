@@ -3,7 +3,7 @@ const AppError = require('../utils/appError');
 
 // Get all plants for a user
 const getAllPlants = async (req, res) => {
-  const plants = await Growth.find({ userId: req.user.id });
+  const plants = await Growth.find();
   res.json({
     status: 200,
     isSuccess: true,
@@ -13,7 +13,7 @@ const getAllPlants = async (req, res) => {
 
 // Get a single plant by ID
 const getPlantById = async (req, res) => {
-  const plant = await Growth.findOne({ _id: req.params.id, userId: req.user.id });
+  const plant = await Growth.findById(req.params.id);
   if (!plant) {
     throw new AppError('Plant not found', 404);
   }
@@ -69,7 +69,7 @@ const deletePlant = async (req, res) => {
 
 // Get growth statistics
 const getGrowthStatistics = async (req, res) => {
-  const plants = await Growth.find({ userId: req.user.id });
+  const plants = await Growth.find();
   
   const stats = {
     totalPlants: plants.length,

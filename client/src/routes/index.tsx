@@ -4,6 +4,7 @@ import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardPage from "../pages/Dashboard/DashboardPage";
+import CropsPage from "../pages/Crops/CropsPage";
 
 const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -16,6 +17,7 @@ const AppRoutes = () => {
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/crops" element={<CropsPage />} />
         {/* Add more protected routes here as the application grows */}
       </Route>
       
