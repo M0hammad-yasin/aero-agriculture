@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors"); // Import the cors package
 const cookieParser = require("cookie-parser"); // Import cookie-parser
-const models = require("./models"); // Import all models
 const app = express();
+const path = require("path");
 const error=require('./middleware/error')
 const initializeRoutes = require("./routes");
 
@@ -19,6 +19,10 @@ app.set('models', models);
 app.use(cookieParser()); // Parse cookies in requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
 initializeRoutes(app);
 app.use(error);
 module.exports = app;

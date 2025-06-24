@@ -3,14 +3,16 @@ const config = require('../config/config');
 const passwordUtils = require('../utils/passwordUtils');
 const jwtUtils = require('../utils/jwtUtils');
 const parseExpiry = require('../utils/parseExpiry');
+const AppError = require('../utils/appError');
 
 // User registration
 exports.register = async (req, res) => {
-  const { name, profileImg, email, password , confirmPassword } = req.body;
+  const { name, email, password, confirmPassword } = req.body;
+  
   // Check if password and confirmPassword match
   if (password !== confirmPassword) {
     return res.status(400).json({
-      data:null,
+      data: null,
       error: 'Passwords do not match',
       isSuccess: false
     });
@@ -19,7 +21,7 @@ exports.register = async (req, res) => {
   let user = await User.findOne({ email });
   if (user) {
     return res.status(403).json({ 
-      data:null,
+      data: null,
       error: 'User already exists',
       isSuccess: false
     });
@@ -29,7 +31,7 @@ exports.register = async (req, res) => {
     name,
     email,
     password,
-    ...(profileImg && { profileImg })
+    ...(req.file && { profileImg: req.file.path.replace(/\\/g, '/') }) // Convert Windows path to URL format
   }
   
   tempUser.password = await passwordUtils.hashPassword(password);
@@ -56,11 +58,11 @@ exports.register = async (req, res) => {
   
   // Set refresh token in HTTP-only cookie
   res.cookie('refreshToken', refreshToken, {
-    httpOnly: true, // Prevents JavaScript access to the cookie
-    secure: config.isProduction, // Use secure cookies in production
-    sameSite: 'strict', // Prevents the cookie from being sent in cross-site requests
+    httpOnly: true,
+    secure: config.isProduction,
+    sameSite: 'strict',
     maxAge: parseExpiry(config.refreshTokenExpiry),
-    path: '/' // Cookie is accessible from all paths
+    path: '/'
   });
   
   // Return response in format expected by client
@@ -82,32 +84,38 @@ exports.register = async (req, res) => {
     status: 200
   });
 };
-exports.update = async (req, res) => {
-  const { name,  email, } = req.body;
-  const  id=req.user.id;
-  let user=await User.findById(id);
-  if(!user) return res.status(404).json({
-    error: 'User not found',
-    isSuccess: false,
-  })
 
-  let tempUser=null;
-  if(email&&user.email!==email) tempUser= await User.findOne({ email });
-  if (tempUser) {
-    return res.status(403).json({ 
-      data:null,
-      error: 'Email already exists',
-      isSuccess: false
-    });
+exports.update = async (req, res) => {
+  const { name, email } = req.body;
+  const id = req.user.id;
+  
+  let user = await User.findById(id);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  // Check if new email already exists
+  if (email && user.email !== email) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new AppError('Email already exists', 403);
+    }
   }
   
-  user=await User.findByIdAndUpdate(id, {
-    ... (name&&{name}),
-    ...(email&&{email}),
-  }, {
-    new: true,
-    runValidators: true
-  });    
+  // Update user data
+  user = await User.findByIdAndUpdate(
+    id,
+    {
+      ...(name && { name }),
+      ...(email && { email }),
+      ...(req.file && { profileImg: req.file.path.replace(/\\/g, '/') })
+    },
+    {
+      new: true,
+      runValidators: true
+    }
+  );
+
   res.json({
     isSuccess: true,
     data: {
@@ -122,6 +130,7 @@ exports.update = async (req, res) => {
     status: 200
   });
 };
+
 // Refresh token
 exports.refreshToken = async (req, res) => {
   // Try to get refresh token from request body first, then from cookie
@@ -351,6 +360,7 @@ exports.login = async (req, res) => {
     error: null,
   });
 };
+
 // Get user data
 exports.getUser = async (req, res) => {
   const user = await User.findById(req.user.id).select('-password -refreshTokens');
