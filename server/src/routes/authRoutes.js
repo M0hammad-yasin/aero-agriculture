@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { register, login, refreshToken, logout, update, getUser } = require('../controllers/authController');
 const auth = require('../middleware/auth');
-const { uploadProfileImage } = require('../utils/fileUpload');
+const { uploadProfileImage } = require('../utils/cloudinary');
 const asyncWrapper = require('../utils/asyncWrapper');
 
 // @route   POST api/auth/register
