@@ -2,9 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "../features/authentication/store/useAuthStore";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
-import ProtectedRoute from "../components/auth/ProtectedRoute";
-import DashboardLayout from "../components/Layout/DashboardLayout";
-import DashboardContent from "../components/Dashboard/DashboardContent";
+import ProtectedRoute from "./ProtectedRoute";
+import DashboardPage from "../pages/Dashboard/DashboardPage";
 
 const AppRoutes = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -16,11 +15,7 @@ const AppRoutes = () => {
       
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={
-          <DashboardLayout>
-            <DashboardContent />
-          </DashboardLayout>
-        } />
+        <Route path="/dashboard" element={<DashboardPage />} />
         {/* Add more protected routes here as the application grows */}
       </Route>
       
