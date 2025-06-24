@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Button,
   FormControl,
@@ -11,7 +11,13 @@ import {
   Flex,
   Text,
   Link,
+  Avatar,
+  Center,
+  Box,
+  IconButton,
+  useColorModeValue,
 } from '@chakra-ui/react';
+import { FiCamera } from 'react-icons/fi';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useToast } from '@chakra-ui/react';
 import { useAuth } from '../../hooks/auth.hook';
@@ -23,12 +29,15 @@ interface RegisterFormErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  profileImg?: string;
 }
 
 export const RegisterForm: React.FC = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const { register, isLoading, error: authError } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   
   const [formData, setFormData] = useState<RegisterRequest>({
     name: '',
@@ -83,6 +92,49 @@ export const RegisterForm: React.FC = () => {
       });
     }
   };
+
+  // Handle file upload
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: 'Invalid file type',
+          description: 'Please select a valid image file (JPEG, PNG, WebP)',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'File too large',
+          description: 'Please select an image smaller than 5MB',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        profileImg: file,
+      }));
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,12 +142,17 @@ export const RegisterForm: React.FC = () => {
     if (!validateForm()) return;
     
     try {
-      const result = await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-      });
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('confirmPassword', formData.confirmPassword);
+      if (formData.profileImg) {
+        formDataToSend.append('profileImg', formData.profileImg);
+      }
+
+      const result = await register(formDataToSend as unknown as RegisterRequest);
 
       if (result.success) {
         toast({
@@ -131,6 +188,43 @@ export const RegisterForm: React.FC = () => {
       
       <form onSubmit={handleSubmit}>
         <VStack spacing={4}>
+          {/* Profile Image Upload */}
+          <FormControl>
+            <FormLabel>Profile Image</FormLabel>
+            <Center>
+              <Box position="relative">
+                <Avatar
+                  size="xl"
+                  name={formData.name}
+                  src={previewImage || undefined}
+                  bg={useColorModeValue('brand.500', 'brand.200')}
+                  color={useColorModeValue('white', 'gray.800')}
+                />
+                <IconButton
+                  icon={<FiCamera />}
+                  size="sm"
+                  colorScheme="brand"
+                  borderRadius="full"
+                  position="absolute"
+                  bottom="0"
+                  right="0"
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label="Upload profile image"
+                />
+              </Box>
+            </Center>
+            <Input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              display="none"
+            />
+            <Text fontSize="sm" color="gray.500" textAlign="center" mt={2}>
+              Click the camera icon to upload a profile picture
+            </Text>
+          </FormControl>
+
           <FormControl isInvalid={!!errors.name} isRequired>
             <FormLabel htmlFor="name">Name</FormLabel>
             <Input

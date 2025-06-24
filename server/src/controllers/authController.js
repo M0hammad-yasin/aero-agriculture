@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
       isSuccess: false
     });
   }
-  
+
   let user = await User.findOne({ email });
   if (user) {
     return res.status(403).json({ 

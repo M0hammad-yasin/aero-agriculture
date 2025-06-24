@@ -38,7 +38,17 @@ class HttpClient {
     this.setupInterceptors();
   }
 
-  private processQueue(error: unknown | null = null) {
+  /**
+   * Get the Axios instance
+   */
+  public getInstance(): AxiosInstance {
+    return this.instance;
+  }
+
+  /**
+   * Process the queue of failed requests
+   */
+  private processQueue(error?: unknown): void {
     this.failedQueue.forEach((promise) => {
       if (error) {
         promise.reject(error);
@@ -49,42 +59,36 @@ class HttpClient {
     this.failedQueue = [];
   }
 
-  private handleTokenExpiration() {
-    // Clear tokens
+  /**
+   * Handle token expiration
+   */
+  private handleTokenExpiration(): void {
     TokenManager.clearTokens();
-    // Reset auth store state
-    const resetAuth = useAuthStore.getState().reset;
-    resetAuth();
-    // Navigate to login
+    useAuthStore.getState().setUser(null);
     navigateToLogin();
   }
 
   /**
-   * Setup request and response interceptors
+   * Setup Axios interceptors
    */
   private setupInterceptors(): void {
     // Request interceptor
     this.instance.interceptors.request.use(
       (config) => {
-        // Get token from localStorage using consistent key
+        // Get the token
         const token = TokenManager.getToken();
-        if(!token){
-          TokenManager.clearTokens();
-        }
-        // If token exists and is valid, add it to the headers
-        if (token && config.headers) {
-          try {
-            // Basic token validation
-            if (token.trim() !== '') {
-              config.headers.Authorization = `Bearer ${token}`;
-            }
-          } catch (error) {
-            console.error('Error setting authorization header:', error);
-            // Remove invalid token
-            TokenManager.clearTokens();
-          }
-        }
         
+        // If token exists, add it to the headers
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        // Check if the request contains FormData
+        if (config.data instanceof FormData) {
+          // Remove the Content-Type header to let the browser set it with the boundary
+          delete config.headers['Content-Type'];
+        }
+
         return config;
       },
       (error) => {
@@ -97,88 +101,75 @@ class HttpClient {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
+        const status = error.response?.status;
 
-        // Handle common error scenarios
-        if (error.response) {
-          const status = error.response.status;
-          
-          // Handle 401 Unauthorized
-          if (status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh-token')) {
-            if (this.isRefreshing) {
-              // If already refreshing, queue this request
-              return new Promise((resolve, reject) => {
-                this.failedQueue.push({ resolve, reject });
-              })
-                .then(() => this.instance(originalRequest))
-                .catch((err) => Promise.reject(err));
-            }
+        // Handle token refresh
+        if (status === 401 && !originalRequest._retry && !this.isRefreshing) {
+          originalRequest._retry = true;
+          this.isRefreshing = true;
 
-            this.isRefreshing = true;
-            originalRequest._retry = true;
-
-            try {
-              // Attempt token refresh - the cookie will be sent automatically
-              const refreshResponse = await this.instance.post<ApiResponse<AuthResponse>>('/auth/refresh-token');
-         
-              if (refreshResponse.data.data?.accessToken) {
-                // Store the new access token
-                TokenManager.setToken(refreshResponse.data.data.accessToken);
-                // Update authorization header
-                originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.data.accessToken}`;
-                // Process queued requests
-                this.processQueue();
-                // Retry original request
+          // Add request to queue if refresh is in progress
+          if (this.isRefreshing) {
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            })
+              .then(() => {
                 return this.instance(originalRequest);
-              } else {
-                this.processQueue(error);
-                this.handleTokenExpiration();
-              }
-            } catch (refreshError) {
-              console.error('Token refresh failed:', refreshError);
-              this.processQueue(refreshError);
+              })
+              .catch((err) => {
+                return Promise.reject(err);
+              });
+          }
+
+          try {
+            // Attempt token refresh - the cookie will be sent automatically
+            const refreshResponse = await this.instance.post<ApiResponse<AuthResponse>>('/auth/refresh-token');
+         
+            if (refreshResponse.data.data?.accessToken) {
+              // Store the new access token
+              TokenManager.setToken(refreshResponse.data.data.accessToken);
+              // Update authorization header
+              originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.data.accessToken}`;
+              // Process queued requests
+              this.processQueue();
+              // Retry original request
+              return this.instance(originalRequest);
+            } else {
+              this.processQueue(error);
               this.handleTokenExpiration();
-            } finally {
-              this.isRefreshing = false;
             }
+          } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError);
+            this.processQueue(refreshError);
+            this.handleTokenExpiration();
+          } finally {
+            this.isRefreshing = false;
           }
-          
-          // Handle 403 Forbidden
-          if (status === 403) {
-            console.error('Access forbidden - insufficient permissions : ',error.response?.data);
-          }
-          
-          // Handle 404 Not Found
-          if (status === 404) {
-            console.error('Resource not found:', error.config?.url);
-          }
-          
-          // Handle 422 Validation Error
-          if (status === 422) {
-            console.error('Validation error:', error.response.data);
-          }
-          
-          // Handle 500+ Server Errors
-          if (status >= 500) {
-            console.error('Server error occurred:', status, error.response.data);
-          }
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error('No response received from server - network error');
-        } else {
-          // Something happened in setting up the request
-          console.error('Error setting up request:', error.message);
         }
         
+        // Handle 403 Forbidden
+        if (status === 403) {
+          console.error('Access forbidden - insufficient permissions : ',error.response?.data);
+        }
+        
+        // Handle 404 Not Found
+        if (status === 404) {
+          console.error('Resource not found:', error.config?.url);
+        }
+        
+        // Handle 422 Validation Error
+        if (status === 422) {
+          console.error('Validation error:', error.response.data);
+        }
+        
+        // Handle 500+ Server Errors
+        if (status >= 500) {
+          console.error('Server error occurred:', status, error.response.data);
+        }
+
         return Promise.reject(error);
       }
     );
-  }
-
-  /**
-   * Get the axios instance
-   */
-  getInstance(): AxiosInstance {
-    return this.instance;
   }
 }
 

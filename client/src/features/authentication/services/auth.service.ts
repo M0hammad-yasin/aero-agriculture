@@ -44,9 +44,21 @@ class AuthService extends BaseApiService<User> {
    * @param registerData - Registration data
    * @returns Promise with API response
    */
-  async register(registerData: RegisterRequest): Promise<ApiResponse<AuthResponse>> {
+  async register(registerData: FormData | RegisterRequest): Promise<ApiResponse<AuthResponse>> {
     try {
-      const response = await this.customPost<RegisterRequest, AuthResponse>('register', registerData);
+      // Set specific config for FormData
+      const config = registerData instanceof FormData ? {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      } : undefined;
+
+      const response = await this.customPost<FormData | RegisterRequest, AuthResponse>(
+        'register', 
+        registerData,
+        config
+      );
+
       if (response.isSuccess && response.data) {
         // Store access token in localStorage
         this.setToken(response.data.accessToken);
@@ -54,7 +66,6 @@ class AuthService extends BaseApiService<User> {
       }
       return response;
     } catch (error) {
-      console.log("authservice 55", error);
       return this.handleError<AuthResponse>(error);
     }
   }
@@ -97,12 +108,22 @@ class AuthService extends BaseApiService<User> {
    * @param profileData - Profile data to update
    * @returns Promise with API response
    */
-  async updateProfile(profileData: ProfileUpdateRequest): Promise<ApiResponse<User>> {
+  async updateProfile(profileData: FormData | ProfileUpdateRequest): Promise<ApiResponse<User>> {
     try {
-      const data= await this.customPut<ProfileUpdateRequest, User>('user/profile', profileData);
-      return data;
-    } catch (error) {
+      // Set specific config for FormData
+      const config = profileData instanceof FormData ? {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      } : undefined;
 
+      const response = await this.customPut<FormData | ProfileUpdateRequest, User>(
+        'user/profile',
+        profileData,
+        config
+      );
+      return response;
+    } catch (error) {
       return this.handleError<User>(error);
     }
   }
