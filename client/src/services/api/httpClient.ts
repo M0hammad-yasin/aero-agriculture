@@ -104,11 +104,10 @@ class HttpClient {
         const status = error.response?.status;
 
         // Handle token refresh
-        if (status === 401 && !originalRequest._retry && !this.isRefreshing) {
+        if (status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-          this.isRefreshing = true;
 
-          // Add request to queue if refresh is in progress
+          // If refresh is already in progress, queue the request
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
               this.failedQueue.push({ resolve, reject });
@@ -120,6 +119,8 @@ class HttpClient {
                 return Promise.reject(err);
               });
           }
+
+          this.isRefreshing = true;
 
           try {
             // Attempt token refresh - the cookie will be sent automatically
