@@ -31,7 +31,7 @@ exports.register = async (req, res) => {
     name,
     email,
     password,
-    ...(req.file && { profileImg: req.file.path.replace(/\\/g, '/') }) // Convert Windows path to URL format
+    ...(req.file && { profileImg: req.file.path }) // Cloudinary returns the URL in req.file.path
   }
   
   tempUser.password = await passwordUtils.hashPassword(password);
@@ -108,7 +108,7 @@ exports.update = async (req, res) => {
     {
       ...(name && { name }),
       ...(email && { email }),
-      ...(req.file && { profileImg: req.file.path.replace(/\\/g, '/') })
+      ...(req.file && { profileImg: req.file.path }) // Cloudinary returns the URL in req.file.path
     },
     {
       new: true,

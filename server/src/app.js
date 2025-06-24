@@ -3,6 +3,7 @@ const cors = require("cors"); // Import the cors package
 const cookieParser = require("cookie-parser"); // Import cookie-parser
 const app = express();
 const path = require("path");
+const models = require("./models"); 
 const error=require('./middleware/error')
 const initializeRoutes = require("./routes");
 
