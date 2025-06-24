@@ -191,19 +191,6 @@ class AuthService extends BaseApiService<User> {
   }
 
   /**
-   * Clear stored tokens
-   */
-  private clearTokens(): void {
-    try {
-      // Only clear the access token from localStorage
-      // The refresh token is handled by the HTTP-only cookie
-      localStorage.removeItem(this.TOKEN_KEY);
-    } catch (error) {
-      console.error('Failed to clear tokens:', error);
-    }
-  }
-
-  /**
    * Validate email format
    * @param email - Email to validate
    * @returns boolean indicating if email is valid
